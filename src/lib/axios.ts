@@ -1,29 +1,31 @@
 import axios from "axios";
 
 export const API = axios.create({
-  baseURL: new URL(process.env.NEXT_PUBLIC_API_URL!).toString(),
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access_token");
     const deviceId = localStorage.getItem("device_id");
-
+    let authToken = "";
+    const authHeader = { accessToken: "", deviceId: "" };
     if (token) {
-      if (config.headers) config.headers["accessToken"] = token;
+      authToken += `accessToken:${token}`;
+      authHeader.accessToken = token;
     }
 
     if (deviceId) {
-      if (config.headers) config.headers["Device-ID"] = deviceId;
+      if (authToken !== "") authToken += ":";
+      authToken += `deviceId:${deviceId}`;
+      authHeader.deviceId = deviceId;
     }
 
     if (config.headers) {
-      config.headers["Access-Control-Allow-Origin"] = "*";
-      config.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE";
-      config.headers["Access-Control-Allow-Headers"] =
-        "Content-Type, Authorization";
+      config.headers["Authorization"] = JSON.stringify(authHeader);
     }
 
+    console.log(config);
     return config;
   },
   (error) => {
