@@ -31,6 +31,7 @@ export default function Page() {
   };
 
   useEffect(() => {
+    localStorage.setItem("device_id", "XAAJAK21412039812313");
     const token = localStorage.getItem("access_token");
     const registered = localStorage.getItem("registered");
     console.log(registered);
