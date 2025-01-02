@@ -60,7 +60,6 @@ export default function LoginForm() {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(data);
       if (data.data.success) {
         // Handle successful login (e.g., redirect to dashboard)
         localStorage.setItem("access_token", data.data.data.accessToken);
@@ -79,8 +78,8 @@ export default function LoginForm() {
   };
 
   useEffect(() => {
-    const access_token = localStorage.getItem("access_token");
-    if (access_token && access_token !== "") {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
       router.push("/");
     }
   }, []);

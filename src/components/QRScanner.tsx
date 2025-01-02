@@ -11,7 +11,10 @@ const QRScanner = ({
 }: {
   isQRScannerOpen: boolean;
   closeScanner: () => void;
-  processQRScan: (data: IDetectedBarcode[]) => Promise<void>;
+  processQRScan: (
+    data: IDetectedBarcode[],
+    closeScanner: () => void
+  ) => Promise<void>;
 }) => {
   return (
     <>
@@ -19,7 +22,10 @@ const QRScanner = ({
         <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="p-4 bg-white w-[80%] rounded-md">
             {/* Add your QR scanner component here */}
-            <Scanner onScan={(result) => processQRScan(result)} />
+            <Scanner
+              onScan={(result) => processQRScan(result, closeScanner)}
+              allowMultiple
+            />
             <Button
               className="mt-2 bg-purple-600 hover:bg-purple-700 w-full"
               onClick={() => closeScanner()}

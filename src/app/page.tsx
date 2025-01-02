@@ -9,13 +9,16 @@ import { useUserStore } from "@/hooks/use-user";
 import IUser from "@/interfaces/IUser";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
+import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
+import { v4 as uuid4 } from "uuid";
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
   const [pendingForApproval, setPendingForApproval] = useState(false);
   const router = useRouter();
+  const user = useUserStore();
 
   const getUserDetails = async () => {
     try {
@@ -30,15 +33,40 @@ export default function Page() {
     }
   };
 
+  const generateDeviceId = () => {
+    if (localStorage.getItem("device_id"))
+      return localStorage.getItem("device_id");
+    const deviceId = uuid4();
+    localStorage.setItem("device_id", deviceId);
+  };
+
+  const processQRScan = async (
+    data: IDetectedBarcode[],
+    closeScanner: () => void
+  ) => {
+    const qrNumber = data[0].rawValue;
+    try {
+      const formData = new FormData();
+      formData.append("qrnumber", qrNumber);
+      const data = await API.post("/scanQR", formData);
+      showSuccessToast(data.data.data.message || "QR scanned successfully");
+      closeScanner();
+      getUserDetails();
+    } catch (error) {
+      errorHandler(error);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem("device_id", "XAAJAK21412039812313");
+    if (
+      !localStorage.getItem("device_id") ||
+      localStorage.getItem("device_id") === ""
+    ) {
+      generateDeviceId();
+    }
     const token = localStorage.getItem("access_token");
     const registered = localStorage.getItem("registered");
-    console.log(registered);
-    // if (!token || token === "") {
-    //   localStorage.removeItem("access_token");
-    //   router.push("/sign-in");
-    // }
+
     if (registered === "false") {
       console.log("not registered");
       router.push("/create-account");
@@ -48,7 +76,10 @@ export default function Page() {
 
   return (
     <section className="px-4 w-full h-full flex flex-col">
-      <Header />
+      <Header
+        pendingForApproval={pendingForApproval}
+        processQRScan={processQRScan}
+      />
 
       <div className="py-8 space-y-8">
         <div className="-space-y-1">

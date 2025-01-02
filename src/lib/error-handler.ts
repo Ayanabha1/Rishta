@@ -9,7 +9,7 @@ const errorHandler = (
     if (error.response.status === 401) {
       //    user unauthorized
       localStorage.removeItem("access_token");
-      showErrorToast("Unauthorized");
+      showErrorToast("Access denied ... Please sign in to continue.");
       redirect("/sign-in");
     } else {
       console.error("Error response:", error.response.data);

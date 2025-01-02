@@ -1,29 +1,37 @@
 import { create } from "zustand";
 
 export interface IUserDetails {
-  id: string;
-  username: string;
-  status: string;
+  module: string;
+  firstname: string;
+  lastname: string;
   email: string;
-  phoneNumber: string;
+  mobile: string;
   address: string;
-  accountBalance: number;
-  accountNumber: string;
-  bankName: string;
-  bankCode: string;
+  salesofficername: string;
+  accountholdername: string;
+  bankaccountnumber: string;
+  ifsccode: string;
+  bankname: string;
+  status: string;
+  "12monthearing": number;
+  latest10paymenthistory: any[];
 }
 
 export const useUserStore = create<IUserDetails>((set) => ({
-  id: "",
-  username: "",
-  status: "",
-  email: "",
-  phoneNumber: "",
-  address: "",
-  accountBalance: 0,
-  accountNumber: "",
-  bankName: "",
-  bankCode: "",
-  updateUserDetails: (data: IUserDetails) =>
+  module: "Contacts",
+  firstname: "Rimba",
+  lastname: "Mishra",
+  email: "rimab@example.com",
+  mobile: "8918829811",
+  address: "4545 Main Street",
+  salesofficername: "Rajib Singa",
+  accountholdername: "Sunia Chouhan",
+  bankaccountnumber: "145456564646464",
+  ifsccode: "SBIN000045",
+  bankname: "United Bank Of India",
+  status: "Pending for Approval",
+  "12monthearing": 150,
+  latest10paymenthistory: [],
+  updateUserDetails: (data: Partial<IUserDetails>) =>
     set((state) => ({ ...state, ...data })),
 }));

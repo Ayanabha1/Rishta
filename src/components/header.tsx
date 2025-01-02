@@ -6,25 +6,24 @@ import { useEffect, useState } from "react";
 import QRScanner from "./QRScanner";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import { useUserStore } from "@/hooks/use-user";
-import { cn, showErrorToast } from "@/lib/utils";
+import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
+import { API } from "@/lib/axios";
 
-export function Header() {
+export function Header({
+  pendingForApproval,
+  processQRScan,
+}: {
+  pendingForApproval: boolean;
+  processQRScan: (
+    data: IDetectedBarcode[],
+    closeScanner: () => void
+  ) => Promise<void>;
+}) {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
-  const [pendingForApproval, setPendingForApproval] = useState(false);
-  const user = useUserStore();
+
   const closeScanner = () => {
     setIsQRScannerOpen(false);
   };
-
-  const processQRScan = async (data: IDetectedBarcode[]) => {
-    console.log(data[0].rawValue);
-  };
-
-  useEffect(() => {
-    if (user?.status === "Pending for Approval") {
-      setPendingForApproval(true);
-    }
-  }, [user]);
 
   return (
     <header className="flex items-center justify-between py-4">
