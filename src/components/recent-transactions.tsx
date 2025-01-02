@@ -23,19 +23,23 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
         </button>
       </div>
       <ul className="space-y-2 overflow-y-scroll h-[90%]">
-        {transactions.map((transaction, i) => (
-          <li key={i} className="flex items-start justify-between text-sm">
-            <div>
-              <p className="font-medium text-purple-900">
-                {transaction.status}
-              </p>
-              <p className="text-purple-700">{transaction.date}</p>
-            </div>
-            <span className="font-semibold text-purple-950">
-              ₹{transaction.amount.toLocaleString()}
-            </span>
-          </li>
-        ))}
+        {transactions.length > 0 ? (
+          transactions.map((transaction, i) => (
+            <li key={i} className="flex items-start justify-between text-sm">
+              <div>
+                <p className="font-medium text-purple-900">
+                  {transaction.status}
+                </p>
+                <p className="text-purple-700">{transaction.date}</p>
+              </div>
+              <span className="font-semibold text-purple-950">
+                ₹{transaction.amount.toLocaleString()}
+              </span>
+            </li>
+          ))
+        ) : (
+          <p>No transactions found</p>
+        )}
       </ul>
     </div>
   );

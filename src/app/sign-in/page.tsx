@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { API } from "@/lib/axios";
@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import errorHandler from "@/lib/error-handler";
+import { useUserStore } from "@/hooks/use-user";
 
 export default function LoginForm() {
   const [mobileNumber, setmobileNumber] = useState("");
@@ -16,6 +17,7 @@ export default function LoginForm() {
   const [otpId, setOtpId] = useState("");
   const [step, setStep] = useState("phone"); // 'phone' or 'otp'
   const [error, setError] = useState("");
+  const user = useUserStore();
   const router = useRouter();
 
   const handleSendOTP = async (e: React.FormEvent) => {
@@ -75,6 +77,13 @@ export default function LoginForm() {
       errorHandler(err);
     }
   };
+
+  useEffect(() => {
+    const access_token = localStorage.getItem("access_token");
+    if (access_token && access_token !== "") {
+      router.push("/");
+    }
+  }, []);
 
   return (
     <>
