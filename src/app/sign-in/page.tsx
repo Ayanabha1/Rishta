@@ -115,6 +115,8 @@ export default function LoginForm() {
                 id="phone"
                 type="tel"
                 placeholder="89********"
+                pattern="[0-9]{10}"
+                maxLength={10}
                 value={mobileNumber}
                 onChange={(e) => setmobileNumber(e.target.value)}
                 required
@@ -147,6 +149,8 @@ export default function LoginForm() {
                 id="otp"
                 type="text"
                 placeholder="Enter 6-digit OTP"
+                pattern="[0-9]{6}"
+                maxLength={6}
                 value={otp}
                 onChange={(e) => setOTP(e.target.value)}
                 required

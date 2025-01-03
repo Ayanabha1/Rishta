@@ -7,7 +7,7 @@ type Props = {};
 
 const PendingApproval = (props: Props) => {
   return (
-    <div className="h-[90%] rounded-lg overflow-y-scroll">
+    <div className="rounded-lg overflow-y-scroll">
       <Card className="p-4 bg-yellow-100 border-l-4 border-yellow-500 space-y-2 mb-4">
         <div className="flex items-center space-x-2">
           <AlertCircle className="w-5 h-5 text-yellow-700" />

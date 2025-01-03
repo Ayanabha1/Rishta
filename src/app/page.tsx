@@ -92,7 +92,9 @@ export default function Page() {
 
         <section className="overflow-hidden  flex flex-col h-[85%]">
           {pendingForApproval ? (
-            <PendingApproval />
+            <div className="space-y-4 h-full flex flex-col">
+              <PendingApproval />
+            </div>
           ) : (
             <div className="space-y-4 h-full flex flex-col">
               <StatsCard
