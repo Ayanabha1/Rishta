@@ -53,6 +53,7 @@ export default function Page() {
       closeScanner();
       getUserDetails();
     } catch (error) {
+      closeScanner();
       errorHandler(error);
     }
   };

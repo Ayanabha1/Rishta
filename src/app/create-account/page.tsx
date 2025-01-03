@@ -8,11 +8,13 @@ import Select from "react-select/async";
 import debounce from "debounce-promise";
 import axios from "axios";
 import { API } from "@/lib/axios";
-import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import errorHandler from "@/lib/error-handler";
 
 export default function CreateAccount() {
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [accountInfo, setAccountInfo] = useState({
     firstname: "",
     lastname: "",
@@ -30,6 +32,7 @@ export default function CreateAccount() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("firstname", accountInfo.firstname);
@@ -43,16 +46,15 @@ export default function CreateAccount() {
       formData.append("bankaccountnumber", accountInfo.bankaccountnumber);
       formData.append("ifsccode", accountInfo.ifsccode);
       formData.append("bankname", accountInfo.bankname);
-      const res = await API.post("/createAccount", formData);
+      await API.post("/createAccount", formData);
       showSuccessToast("Account created successfully");
       localStorage.setItem("registered", "true");
       router.push("/");
     } catch (error: any) {
-      console.log(error.response.data.data.message);
-      showErrorToast(
-        error?.response?.data?.data?.message || "Failed to create account"
-      );
+      setLoading(false);
+      errorHandler(error);
     }
+    setLoading(false);
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAccountInfo((prev) => ({
@@ -84,7 +86,6 @@ export default function CreateAccount() {
 
   const handleAccountChange = (selectedOption: any) => {
     if (selectedOption) {
-      console.log(selectedOption);
       setAccountInfo((prev) => ({
         ...prev,
         accountid: selectedOption.map((item: any) => item.value),
@@ -99,13 +100,13 @@ export default function CreateAccount() {
   if (!mounted) return null;
 
   return (
-    <div className="h-full glassmorphic-card shadow-2xl overflow-hidden">
-      <div className="relative max-w-[390px] h-full mx-auto p-4 ">
+    <div className="h-full w-full glassmorphic-card shadow-2xl overflow-y-hidden">
+      <div className="relative h-full mx-auto  pb-10 p-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8 sticky top-0 z-10 ">
+        <div className="flex justify-between items-center mb-8 my-4 sticky top-0 z-10">
           <Link
             href="/"
-            className="rounded-full p-2 hover:bg-black/5 transition-colors"
+            className="rounded-full p-2 hover:bg-black/5 transition-colors bg-white/40 backdrop-blur-md"
           >
             <ArrowLeft className="h-5 w-5 text-black" />
           </Link>
@@ -117,7 +118,7 @@ export default function CreateAccount() {
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 overflow-y-scroll h-[99%] pb-24"
+          className="space-y-6 overflow-y-scroll h-[99%] w-full pb-24"
         >
           {/* Personal Information */}
           <div className="space-y-4">
@@ -335,7 +336,13 @@ export default function CreateAccount() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 px-4  text-white rounded-lg font-semibold  bg-purple-600 hover:bg-purple-700"
+            className={cn(
+              "w-full py-3 px-4  text-white rounded-lg font-semibold  bg-purple-600 hover:bg-purple-700 shadow-lg",
+              {
+                "opacity-50 cursor-not-allowed": loading,
+              }
+            )}
+            disabled={loading}
           >
             Create Account
           </button>

@@ -27,7 +27,7 @@ const QRScanner = ({
               allowMultiple
             />
             <Button
-              className="mt-2 bg-purple-600 hover:bg-purple-700 w-full"
+              className="mt-2 bg-purple-600 hover:bg-purple-700 w-full shadow-xl"
               onClick={() => closeScanner()}
             >
               Close Scanner

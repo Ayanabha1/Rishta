@@ -183,7 +183,7 @@ export default function ProfilePage() {
       <div className="pt-6">
         <Button
           variant="ghost"
-          className="w-full border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-medium rounded-xl h-12"
+          className="w-full shadow-md border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-medium rounded-xl h-12"
           onClick={logOut}
         >
           <LogOut className="w-5 h-5 mr-2" />

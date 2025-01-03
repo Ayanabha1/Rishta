@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { API } from "@/lib/axios";
-import { showSuccessToast } from "@/lib/utils";
+import { cn, showSuccessToast } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -17,12 +17,14 @@ export default function LoginForm() {
   const [otpId, setOtpId] = useState("");
   const [step, setStep] = useState("phone"); // 'phone' or 'otp'
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const user = useUserStore();
   const router = useRouter();
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       const deviceId = localStorage.getItem("device_id");
       const formData = new FormData();
@@ -37,16 +39,16 @@ export default function LoginForm() {
       setOtpId(data.data.data.otpId);
       setStep("otp");
     } catch (err: any) {
-      if (err.response) {
-        setError(err.response.data.data.message || "Failed to send OTP.");
-      }
+      setLoading(false);
       errorHandler(err);
     }
+    setLoading(false);
   };
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       const deviceId = localStorage.getItem("device_id");
       const formData = new FormData();
@@ -70,11 +72,10 @@ export default function LoginForm() {
         setError("Invalid OTP. Please try again.");
       }
     } catch (err: any) {
-      if (err.response) {
-        setError(err.response.data.data.message || "Failed to send OTP.");
-      }
+      setLoading(false);
       errorHandler(err);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -122,7 +123,13 @@ export default function LoginForm() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className={cn(
+                "w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg  border border-purple-600",
+                {
+                  "cursor-not-allowed opacity-50": loading,
+                }
+              )}
+              disabled={loading}
             >
               Send OTP
             </Button>
@@ -148,7 +155,12 @@ export default function LoginForm() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className={cn(
+                "w-full bg-purple-600 hover:bg-purple-700 shadow-lg text-white",
+                {
+                  "cursor-not-allowed opacity-50": loading,
+                }
+              )}
             >
               Verify OTP
             </Button>
