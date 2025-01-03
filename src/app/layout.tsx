@@ -25,10 +25,12 @@ export default function RootLayout({
         <main className="relative h-screen max-w-[480px] w-full overflow-hidden  bg-gradient p-4 flex">
           {children}
           <ToastContainer
-            className="absolute z-50 top-[90%]"
+            className="absolute z-50 top-[90%] left-[50%] translate-x-[-50%]"
             stacked
             limit={1}
             closeOnClick
+            closeButton={false}
+            position="bottom-center"
           />
         </main>
       </body>

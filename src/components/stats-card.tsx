@@ -18,7 +18,7 @@ export function StatsCard({
   showChart,
 }: StatsCardProps) {
   return (
-    <div className="relative glassmorphic-card overflow-hidden rounded-2xl bg-white/10 backdrop-blur-md p-4">
+    <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <h3 className="text-lg font-semibold text-purple-950">{title}</h3>
