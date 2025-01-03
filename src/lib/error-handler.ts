@@ -10,18 +10,19 @@ const errorHandler = (
     return;
   }
 
-  if (error.response) {
+  if (JSON.stringify(error.response) !== "{}") {
     if (error.response.status === 401) {
       // user unauthorized
       localStorage.removeItem("access_token");
       showErrorToast("Access denied ... Please sign in to continue.");
       redirect("/sign-in");
     } else {
-      console.error("Error response:", error.response.data);
-      console.error("Error status:", error.response.status);
-      console.error("Error headers:", error.response.headers);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
       showErrorToast(error?.response?.data?.data?.message || defaultMessage);
     }
+  } else {
+    showErrorToast(defaultMessage);
   }
 };
 

@@ -13,7 +13,7 @@ interface RecentTransactionsProps {
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   console.log(transactions);
   return (
-    <div className="relative glassmorphic-card shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 h-[90%] overflow-hidden">
+    <div className="relative glassmorphic-card shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 h-[78%] overflow-hidden">
       <div className="flex items-center justify-between mb-4 ">
         <h3 className="text-lg font-semibold text-purple-950">
           Recent Transactions

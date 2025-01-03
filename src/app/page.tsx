@@ -93,7 +93,7 @@ export default function Page() {
           {pendingForApproval ? (
             <PendingApproval />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 h-full flex flex-col">
               <StatsCard
                 title="Your Yearly Earnings"
                 value={userData?.["12monthearing"] || "0"}
