@@ -81,7 +81,7 @@ export default function Page() {
         processQRScan={processQRScan}
       />
 
-      <div className="py-8 space-y-8 overflow-y-scroll">
+      <div className="py-8 space-y-8 overflow-y-scroll h-full">
         <div className="-space-y-1">
           <h1 className="text-2xl font-semibold text-purple-950">Welcome</h1>
           <p className="text-5xl font-bold text-purple-950">
@@ -89,7 +89,7 @@ export default function Page() {
           </p>
         </div>
 
-        <section className="overflow-hidden h-[85%]">
+        <section className="overflow-hidden  flex flex-col h-[85%]">
           {pendingForApproval ? (
             <PendingApproval />
           ) : (
