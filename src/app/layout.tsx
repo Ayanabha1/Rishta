@@ -22,7 +22,7 @@ export default function RootLayout({
       <body
         className={`${poppins.className} antialiased flex min-h-screen w-full items-center justify-center bg-gray-900 p-0`}
       >
-        <main className="relative h-[400px] max-w-[480px] w-full overflow-hidden  bg-gradient p-4 flex">
+        <main className="relative h-screen max-w-[480px] w-full overflow-hidden  bg-gradient p-4 flex">
           {children}
           <ToastContainer
             className="absolute z-50 top-[90%] left-[50%] translate-x-[-50%]"
