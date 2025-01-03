@@ -81,7 +81,7 @@ export default function Page() {
         processQRScan={processQRScan}
       />
 
-      <div className="py-8 space-y-8">
+      <div className="py-8 space-y-8 overflow-y-scroll">
         <div className="-space-y-1">
           <h1 className="text-2xl font-semibold text-purple-950">Welcome</h1>
           <p className="text-5xl font-bold text-purple-950">
