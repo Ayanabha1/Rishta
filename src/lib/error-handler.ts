@@ -5,9 +5,14 @@ const errorHandler = (
   error: any,
   defaultMessage = "Something went wrong. Please try again later."
 ) => {
+  if (error.status === 404) {
+    showErrorToast("Route not found");
+    return;
+  }
+
   if (error.response) {
     if (error.response.status === 401) {
-      //    user unauthorized
+      // user unauthorized
       localStorage.removeItem("access_token");
       showErrorToast("Access denied ... Please sign in to continue.");
       redirect("/sign-in");

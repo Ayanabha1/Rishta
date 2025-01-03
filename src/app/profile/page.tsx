@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import IUser from "@/interfaces/IUser";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
@@ -14,6 +15,7 @@ import {
   BadgeCheck,
   DollarSign,
   BadgeInfo,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -32,13 +34,21 @@ export default function ProfilePage() {
     }
   };
 
+  const logOut = () => {
+    console.log("Logging out");
+    localStorage.removeItem("access_token");
+    window.location.href = "/sign-in";
+  };
+
   useEffect(() => {
     getUserDetails();
   }, []);
 
   return (
-    <div className="overflow-scroll glassmorphic-card shadow-2xl w-full">
-      <div className="relative h-[844px] w-full max-w-[390px] mx-auto overflow-auto p-4 pb-8">
+    <div className="glassmorphic-card shadow-2xl w-full p-4 pb-8 flex flex-col">
+      {/* top section */}
+
+      <div className="">
         {/* Header */}
         <div className="flex justify-between items-center mb-8  -mx-4 px-4 py-2">
           <Link
@@ -83,91 +93,102 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Content Sections */}
-        <div className="mt-4">
-          {/* Personal Information */}
-          <div className="backdrop-blur-md rounded-2xl p-4 space-y-4  ">
-            <h2 className="text-lg font-semibold ">Personal Information</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 ">
-                <Mail className="w-5 h-5 text-pink-500" />
-                <span className="/80">{userData?.email}</span>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <Phone className="w-5 h-5 text-pink-500" />
-                <span className="/80">{userData?.mobile}</span>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <MapPin className="w-5 h-5 text-pink-500" />
-                <span className="/80">{userData?.address}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Team Information */}
-          <div className="backdrop-blur-md rounded-2xl p-4 space-y-4 ">
-            <h2 className="text-lg font-semibold ">Team Information</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 ">
-                <User className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">Sales Officer</p>
-                  <p className="/80">{userData?.salesofficername}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <User className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">Account Holder</p>
-                  <p className="/80">{userData?.accountholdername}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bank Details */}
-          <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
-            <h2 className="text-lg font-semibold ">Bank Details</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 ">
-                <Building2 className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">Bank Name</p>
-                  <p className="/80">{userData?.bankname}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <CreditCard className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">Account Number</p>
-                  <p className="/80">{userData?.bankaccountnumber}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <Wallet className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">IFSC Code</p>
-                  <p className="/80">{userData?.ifsccode}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Earnings */}
-          <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
-            <h2 className="text-lg font-semibold ">Earnings</h2>
+      {/* Content Sections */}
+      <div className="mt-4 overflow-y-scroll rounded-lg bg-white/20">
+        {/* Personal Information */}
+        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4  ">
+          <h2 className="text-lg font-semibold ">Personal Information</h2>
+          <div className="space-y-3">
             <div className="flex items-center gap-3 ">
-              <DollarSign className="w-5 h-5 text-pink-500" />
+              <Mail className="w-5 h-5 text-pink-500" />
+              <span className="/80">{userData?.email}</span>
+            </div>
+            <div className="flex items-center gap-3 ">
+              <Phone className="w-5 h-5 text-pink-500" />
+              <span className="/80">{userData?.mobile}</span>
+            </div>
+            <div className="flex items-center gap-3 ">
+              <MapPin className="w-5 h-5 text-pink-500" />
+              <span className="/80">{userData?.address}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Team Information */}
+        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4 ">
+          <h2 className="text-lg font-semibold ">Team Information</h2>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 ">
+              <User className="w-5 h-5 text-pink-500" />
               <div>
-                <p className="text-xs /60">Last 12 Months</p>
-                <p className="text-2xl font-bold ">
-                  ₹{userData?.["12monthearing"] || "0"}
-                </p>
+                <p className="text-xs /60">Sales Officer</p>
+                <p className="/80">{userData?.salesofficername}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 ">
+              <User className="w-5 h-5 text-pink-500" />
+              <div>
+                <p className="text-xs /60">Account Holder</p>
+                <p className="/80">{userData?.accountholdername}</p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bank Details */}
+        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
+          <h2 className="text-lg font-semibold ">Bank Details</h2>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 ">
+              <Building2 className="w-5 h-5 text-pink-500" />
+              <div>
+                <p className="text-xs /60">Bank Name</p>
+                <p className="/80">{userData?.bankname}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 ">
+              <CreditCard className="w-5 h-5 text-pink-500" />
+              <div>
+                <p className="text-xs /60">Account Number</p>
+                <p className="/80">{userData?.bankaccountnumber}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 ">
+              <Wallet className="w-5 h-5 text-pink-500" />
+              <div>
+                <p className="text-xs /60">IFSC Code</p>
+                <p className="/80">{userData?.ifsccode}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Earnings */}
+        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
+          <h2 className="text-lg font-semibold ">Earnings</h2>
+          <div className="flex items-center gap-3 ">
+            <DollarSign className="w-5 h-5 text-pink-500" />
+            <div>
+              <p className="text-xs /60">Last 12 Months</p>
+              <p className="text-2xl font-bold ">
+                ₹{userData?.["12monthearing"] || "0"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-6">
+        <Button
+          variant="ghost"
+          className="w-full border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-medium rounded-xl h-12"
+          onClick={logOut}
+        >
+          <LogOut className="w-5 h-5 mr-2" />
+          Logout
+        </Button>
       </div>
     </div>
   );
