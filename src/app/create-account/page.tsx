@@ -291,14 +291,24 @@ export default function CreateAccount() {
                 minLength={9}
                 maxLength={18}
                 required
-                pattern="[0-9]"
+                pattern="[0-9]{9,18}"
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="145456564646434"
-                value={accountInfo.bankaccountnumber}
                 onInput={(e) => {
                   const target = e.target as HTMLInputElement;
                   target.value = target.value.replace(/[^0-9]/g, "");
                 }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "Bank account number must be between 9 and 18 digits."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
+                value={accountInfo.bankaccountnumber}
                 onChange={handleChange}
               />
             </div>
