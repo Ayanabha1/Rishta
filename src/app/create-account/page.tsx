@@ -238,7 +238,7 @@ export default function CreateAccount() {
                 htmlFor="mailingzip"
                 className="block text-sm font-medium text-black mb-1"
               >
-                Mailing ZIP
+                Pin Code
               </label>
               <input
                 type="text"
@@ -260,7 +260,7 @@ export default function CreateAccount() {
                   const target = e.target as HTMLInputElement;
                   if (target.validity.patternMismatch) {
                     target.setCustomValidity(
-                      "Mailing ZIP should be a 6-digit number."
+                      "Pincode should be a 6-digit number."
                     );
                   } else {
                     target.setCustomValidity("");
@@ -411,12 +411,22 @@ export default function CreateAccount() {
                 required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="SBIN0000789"
-                pattern="[0-9]{11}"
+                pattern="[A-Za-z0-9]{11}"
                 value={accountInfo.ifsccode}
                 onChange={handleChange}
                 onInput={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^a-zA-Z0-9\s]/g, "");
+                  target.value = target.value.replace(/[^A-Za-z0-9]/g, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "IFSC code must be 11 characters long."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
                 }}
               />
             </div>

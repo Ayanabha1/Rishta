@@ -174,7 +174,7 @@ export default function LoginForm() {
                 onInvalid={(e) => {
                   const target = e.target as HTMLInputElement;
                   if (target.validity.patternMismatch) {
-                    target.setCustomValidity("OTP must be between 6 digits.");
+                    target.setCustomValidity("OTP must be a 6 digit number.");
                   } else {
                     target.setCustomValidity("");
                   }
