@@ -119,6 +119,20 @@ export default function LoginForm() {
                 maxLength={10}
                 value={mobileNumber}
                 onChange={(e) => setmobileNumber(e.target.value)}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^0-9]/g, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "Phone number must be between 10 digits."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
                 required
                 className="w-full bg-white/30 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
               />
@@ -153,6 +167,18 @@ export default function LoginForm() {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOTP(e.target.value)}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^0-9]/g, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity("OTP must be between 6 digits.");
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
                 required
                 className="w-full bg-white/30 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
               />

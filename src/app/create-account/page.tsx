@@ -142,6 +142,23 @@ export default function CreateAccount() {
                   placeholder="Ayanabha"
                   value={accountInfo.firstname}
                   onChange={handleChange}
+                  onInput={(e) => {
+                    const regex = /^[a-zA-Z ]*$/;
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^\p{L}\s]/gu,
+                      ""
+                    );
+                  }}
+                  onInvalid={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    if (target.validity.patternMismatch) {
+                      target.setCustomValidity(
+                        "First name should only contain alphabets."
+                      );
+                    } else {
+                      target.setCustomValidity("");
+                    }
+                  }}
                 />
               </div>
               <div>
@@ -160,6 +177,23 @@ export default function CreateAccount() {
                   placeholder="Misra"
                   value={accountInfo.lastname}
                   onChange={handleChange}
+                  onInput={(e) => {
+                    const regex = /^[a-zA-Z ]*$/;
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^\p{L}\s]/gu,
+                      ""
+                    );
+                  }}
+                  onInvalid={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    if (target.validity.patternMismatch) {
+                      target.setCustomValidity(
+                        "Last name should only contain alphabets."
+                      );
+                    } else {
+                      target.setCustomValidity("");
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -211,10 +245,27 @@ export default function CreateAccount() {
                 id="mailingzip"
                 name="mailingzip"
                 required
+                minLength={6}
+                maxLength={6}
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="78995555"
                 value={accountInfo.mailingzip}
                 onChange={handleChange}
+                pattern="[0-9]{6}"
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^0-9]/g, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "Mailing ZIP should be a 6-digit number."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
               />
             </div>
           </div>
@@ -234,6 +285,7 @@ export default function CreateAccount() {
               isMulti
               placeholder="Search accounts..."
               className="rounded-lg"
+              required
             />
 
             <div>
@@ -252,6 +304,21 @@ export default function CreateAccount() {
                 placeholder="Rajib Singa"
                 value={accountInfo.salesofficername}
                 onChange={handleChange}
+                pattern="[a-zA-Z ]*"
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "Sales officer name should only contain alphabets."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
               />
             </div>
           </div>
@@ -275,6 +342,21 @@ export default function CreateAccount() {
                 placeholder="Sunia Chouhan"
                 value={accountInfo.accountholdername}
                 onChange={handleChange}
+                pattern="[a-zA-Z ]*"
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "Account holder name should only contain alphabets."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
               />
             </div>
             <div>
@@ -331,6 +413,10 @@ export default function CreateAccount() {
                 placeholder="SBIN0000789"
                 value={accountInfo.ifsccode}
                 onChange={handleChange}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^a-zA-Z0-9\s]/g, "");
+                }}
               />
             </div>
             <div>
@@ -349,6 +435,10 @@ export default function CreateAccount() {
                 placeholder="United Bank Of India"
                 value={accountInfo.bankname}
                 onChange={handleChange}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
+                }}
               />
             </div>
           </div>
