@@ -45,7 +45,7 @@ const PendingApproval = (props: Props) => {
           If you have any questions about your application or need to update any
           information, please don't hesitate to contact our support team.
         </p>
-        <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
+        <button className="w-full shadow-lg bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
           Contact Support
         </button>
       </Card>
