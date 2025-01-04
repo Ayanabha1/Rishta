@@ -73,8 +73,9 @@ export default function Page() {
 
     if (registered === "false") {
       router.push("/create-account");
+    } else {
+      getUserDetails();
     }
-    getUserDetails();
   }, []);
 
   if (loading) {

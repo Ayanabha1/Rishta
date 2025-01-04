@@ -135,7 +135,7 @@ export default function ProfilePage() {
               {loading ? (
                 <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
               ) : (
-                <span className="/80">{userData?.email}</span>
+                <span className="/80 ">{userData?.email}</span>
               )}
             </div>
             <div className="flex items-center gap-3 ">
