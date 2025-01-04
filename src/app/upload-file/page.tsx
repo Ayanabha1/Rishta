@@ -76,7 +76,7 @@ export default function UploadPage() {
 
   return (
     <div className="w-full rounded-xl glassmorphic-card shadow-2xl">
-      <div className="relative w-full mx-auto  pb-10 p-4">
+      <div className="relative w-fulll mx-auto  pb-10 p-4">
         {/* Header */}
         <div className="flex justify-between items-center mb-8  to-purple-100 mt-4">
           <Link

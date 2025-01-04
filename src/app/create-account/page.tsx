@@ -288,10 +288,17 @@ export default function CreateAccount() {
                 type="text"
                 id="bankaccountnumber"
                 name="bankaccountnumber"
+                minLength={9}
+                maxLength={18}
                 required
+                pattern="[0-9]"
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="145456564646434"
                 value={accountInfo.bankaccountnumber}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^0-9]/g, "");
+                }}
                 onChange={handleChange}
               />
             </div>
@@ -306,6 +313,9 @@ export default function CreateAccount() {
                 type="text"
                 id="ifsccode"
                 name="ifsccode"
+                maxLength={11}
+                minLength={11}
+                style={{ textTransform: "uppercase" }}
                 required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="SBIN0000789"

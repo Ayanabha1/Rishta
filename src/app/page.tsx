@@ -17,18 +17,22 @@ import { v4 as uuid4 } from "uuid";
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
   const [pendingForApproval, setPendingForApproval] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const user = useUserStore();
 
   const getUserDetails = async () => {
     try {
+      setLoading(true);
       const data = await API.get("/getAccount");
       setUserData(data.data.data.data);
       useUserStore.setState(data.data.data.data);
       setPendingForApproval(
         data.data.data.data.status === "Pending for Approval"
       );
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       errorHandler(error);
     }
   };
@@ -65,15 +69,26 @@ export default function Page() {
     ) {
       generateDeviceId();
     }
-    const token = localStorage.getItem("access_token");
     const registered = localStorage.getItem("registered");
 
     if (registered === "false") {
-      console.log("not registered");
       router.push("/create-account");
     }
     getUserDetails();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div className="bg-white p-6 rounded-lg shadow-xl">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="text-purple-600 font-semibold mt-4 text-center">
+            Loading page...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="px-4 w-full h-full flex flex-col">

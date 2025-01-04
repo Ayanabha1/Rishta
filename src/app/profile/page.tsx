@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import IUser from "@/interfaces/IUser";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
+import { set } from "lodash";
 import {
   ArrowLeft,
   Mail,
@@ -23,13 +24,16 @@ import { useEffect, useState } from "react";
 export default function ProfilePage() {
   const [userData, setUserData] = useState<IUser>();
   const [profilePending, setProfilePending] = useState(false);
+  const [loading, setLoading] = useState(true);
   const getUserDetails = async () => {
     try {
       const data = await API.get("/getAccount");
       console.log(data.data.data);
       setUserData(data.data.data.data);
       setProfilePending(data.data.data.data.status === "Pending for Approval");
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       errorHandler(error);
     }
   };
@@ -43,6 +47,19 @@ export default function ProfilePage() {
   useEffect(() => {
     getUserDetails();
   }, []);
+
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen w-full flex items-center justify-center">
+  //       <div className="bg-white p-6 rounded-lg shadow-xl">
+  //         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+  //         <p className="text-purple-600 font-semibold mt-4 text-center">
+  //           Loading profile...
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="glassmorphic-card shadow-2xl w-full p-4 pb-8 flex flex-col">
@@ -64,54 +81,78 @@ export default function ProfilePage() {
 
         {/* Profile Header */}
         <div className="text-center space-y-4">
-          <div className="relative w-24 h-24 mx-auto">
-            <div className="w-full h-full rounded-full bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center text-3xl font-bold">
-              {userData?.firstname[0]}
-              {userData?.lastname[0]}
+          {loading ? (
+            <div className="w-24 h-24 rounded-full bg-black/10 animate-pulse mx-auto"></div>
+          ) : (
+            <div className="relative w-24 h-24 mx-auto">
+              <div className="w-full h-full rounded-full bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center text-3xl font-bold">
+                {userData?.firstname[0]}
+                {userData?.lastname[0]}
+              </div>
+              {profilePending ? (
+                <div className="absolute -bottom-2 right-0 bg-yellow-500 rounded-full p-2">
+                  <BadgeInfo className="w-4 h-4 " />
+                </div>
+              ) : (
+                <div className="absolute -bottom-2 right-0 bg-green-500 rounded-full p-2 shadow-lg">
+                  <BadgeCheck className="w-4 h-4 " />
+                </div>
+              )}
             </div>
-            {profilePending ? (
-              <div className="absolute -bottom-2 right-0 bg-yellow-500 rounded-full p-2 shadow-lg">
-                <BadgeInfo className="w-4 h-4 " />
-              </div>
-            ) : (
-              <div className="absolute -bottom-2 right-0 bg-green-500 rounded-full p-2 shadow-lg">
-                <BadgeCheck className="w-4 h-4 " />
-              </div>
-            )}
-          </div>
+          )}
 
           <div>
-            <h1 className="text-2xl font-bold ">{`${userData?.firstname} ${userData?.lastname}`}</h1>
+            {loading ? (
+              <div className="h-6 w-48 bg-black/10 rounded animate-pulse mx-auto"></div>
+            ) : (
+              <h1 className="text-2xl font-bold ">{`${userData?.firstname} ${userData?.lastname}`}</h1>
+            )}
             <div className="flex items-center justify-center gap-2 mt-2">
-              <span
-                className={`px-3 py-1 rounded-full text-xs ${
-                  profilePending ? "bg-yellow-500" : "bg-green-500"
-                } text-black`}
-              >
-                {userData?.status}
-              </span>
+              {loading ? (
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse mx-auto"></div>
+              ) : (
+                <span
+                  className={`px-3 py-1 rounded-full text-xs ${
+                    profilePending ? "bg-yellow-500" : "bg-green-500"
+                  } text-black`}
+                >
+                  {userData?.status}
+                </span>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Content Sections */}
-      <div className="mt-4 overflow-y-scroll rounded-lg bg-white/20">
+      <div className="mt-4 overflow-y-scroll rounded-lg bg-white/20 shadow">
         {/* Personal Information */}
         <div className="backdrop-blur-md rounded-2xl p-4 space-y-4  ">
           <h2 className="text-lg font-semibold ">Personal Information</h2>
           <div className="space-y-3">
             <div className="flex items-center gap-3 ">
               <Mail className="w-5 h-5 text-pink-500" />
-              <span className="/80">{userData?.email}</span>
+              {loading ? (
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+              ) : (
+                <span className="/80">{userData?.email}</span>
+              )}
             </div>
             <div className="flex items-center gap-3 ">
               <Phone className="w-5 h-5 text-pink-500" />
-              <span className="/80">{userData?.mobile}</span>
+              {loading ? (
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+              ) : (
+                <span className="/80">{userData?.mobile}</span>
+              )}
             </div>
             <div className="flex items-center gap-3 ">
               <MapPin className="w-5 h-5 text-pink-500" />
-              <span className="/80">{userData?.address}</span>
+              {loading ? (
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+              ) : (
+                <span className="/80">{userData?.address}</span>
+              )}
             </div>
           </div>
         </div>
@@ -124,14 +165,22 @@ export default function ProfilePage() {
               <User className="w-5 h-5 text-pink-500" />
               <div>
                 <p className="text-xs /60">Sales Officer</p>
-                <p className="/80">{userData?.salesofficername}</p>
+                {loading ? (
+                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                ) : (
+                  <p className="/80">{userData?.salesofficername}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3 ">
               <User className="w-5 h-5 text-pink-500" />
               <div>
                 <p className="text-xs /60">Account Holder</p>
-                <p className="/80">{userData?.accountholdername}</p>
+                {loading ? (
+                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                ) : (
+                  <p className="/80">{userData?.accountholdername}</p>
+                )}
               </div>
             </div>
           </div>
@@ -145,21 +194,33 @@ export default function ProfilePage() {
               <Building2 className="w-5 h-5 text-pink-500" />
               <div>
                 <p className="text-xs /60">Bank Name</p>
-                <p className="/80">{userData?.bankname}</p>
+                {loading ? (
+                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                ) : (
+                  <p className="/80">{userData?.bankname}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3 ">
               <CreditCard className="w-5 h-5 text-pink-500" />
               <div>
                 <p className="text-xs /60">Account Number</p>
-                <p className="/80">{userData?.bankaccountnumber}</p>
+                {loading ? (
+                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                ) : (
+                  <p className="/80">{userData?.bankaccountnumber}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3 ">
               <Wallet className="w-5 h-5 text-pink-500" />
               <div>
                 <p className="text-xs /60">IFSC Code</p>
-                <p className="/80">{userData?.ifsccode}</p>
+                {loading ? (
+                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                ) : (
+                  <p className="/80">{userData?.ifsccode}</p>
+                )}
               </div>
             </div>
           </div>
@@ -172,9 +233,13 @@ export default function ProfilePage() {
             <DollarSign className="w-5 h-5 text-pink-500" />
             <div>
               <p className="text-xs /60">Last 12 Months</p>
-              <p className="text-2xl font-bold ">
-                ₹{userData?.["12monthearing"] || "0"}
-              </p>
+              {loading ? (
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+              ) : (
+                <p className="/80 text-2xl font-bold ">
+                  ₹{userData?.["12monthearing"]}
+                </p>
+              )}
             </div>
           </div>
         </div>
