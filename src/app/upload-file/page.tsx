@@ -14,7 +14,10 @@ import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 
-export type DocumentType = "Aadhar" | "Cancelled Cheque" | "PAN";
+export type DocumentType =
+  | "Bank Statement"
+  | "Cancel Cheque"
+  | "Bank Pass Book";
 
 export interface FileUpload {
   file: File;
@@ -24,11 +27,12 @@ export interface FileUpload {
 
 export default function UploadPage() {
   const [uploads, setUploads] = useState<FileUpload[]>([]);
-  const [currentType, setCurrentType] = useState<DocumentType>("Aadhar");
-  const documentTypes = [
-    { value: "Aadhar", label: "Aadhar" },
-    { value: "Cancelled Cheque", label: "Cancelled Cheque" },
-    { value: "PAN", label: "PAN" },
+  const [currentType, setCurrentType] =
+    useState<DocumentType>("Bank Statement");
+  const documentTypes: { value: DocumentType; label: string }[] = [
+    { value: "Bank Statement", label: "Bank Statement" },
+    { value: "Cancel Cheque", label: "Cancel Cheque" },
+    { value: "Bank Pass Book", label: "Bank Pass Book" },
   ];
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +42,6 @@ export default function UploadPage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      console.log(base64String);
       setUploads((prev) => [
         ...prev,
         {
@@ -64,7 +67,6 @@ export default function UploadPage() {
       formData.append("filename", uploads[0].type);
       formData.append("image", uploads[0].preview);
       const res = await API.post("/uploadFile", formData);
-      console.log(res);
       showSuccessToast("File uploaded successfully");
       setUploads([]);
     } catch (error: any) {
@@ -74,9 +76,9 @@ export default function UploadPage() {
 
   return (
     <div className="w-full rounded-xl glassmorphic-card shadow-2xl">
-      <div className="relative max-w-[390px] mx-auto p-4">
+      <div className="relative w-full mx-auto  pb-10 p-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8  to-purple-100 -mx-4 px-4 py-2">
+        <div className="flex justify-between items-center mb-8  to-purple-100 mt-4">
           <Link
             href="/"
             className="rounded-full p-2 bg-white/40 backdrop-blur-md hover:bg-white/20 transition-colors"
