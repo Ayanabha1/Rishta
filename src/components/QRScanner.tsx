@@ -20,10 +20,11 @@ const QRScanner = ({
     <>
       {isQRScannerOpen ? (
         <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="p-4 bg-white w-[80%] rounded-md">
+          <div className="p-4 bg-white w-[80%] rounded-md flex flex-col gap-2">
             {/* Add your QR scanner component here */}
             <Scanner
               onScan={(result) => processQRScan(result, closeScanner)}
+              scanDelay={5000}
               allowMultiple
             />
             <Button
