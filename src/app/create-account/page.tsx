@@ -248,7 +248,7 @@ export default function CreateAccount() {
                 minLength={6}
                 maxLength={6}
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="78995555"
+                placeholder="732846"
                 value={accountInfo.mailingzip}
                 onChange={handleChange}
                 pattern="[0-9]{6}"
@@ -411,6 +411,7 @@ export default function CreateAccount() {
                 required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="SBIN0000789"
+                pattern="[0-9]{11}"
                 value={accountInfo.ifsccode}
                 onChange={handleChange}
                 onInput={(e) => {

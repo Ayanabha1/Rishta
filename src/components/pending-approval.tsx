@@ -34,7 +34,7 @@ const PendingApproval = (props: Props) => {
           </li>
           <li className="flex items-start space-x-2">
             <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
-            <span>You'll receive an email once your account is approved</span>
+            <span>You'll receive a sms once your account is approved</span>
           </li>
         </ul>
       </Card>
