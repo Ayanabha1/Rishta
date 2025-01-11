@@ -72,7 +72,7 @@ export default function Page() {
     const registered = localStorage.getItem("registered");
 
     if (registered === "false") {
-      router.push("/create-account");
+      router.push("/select-account-type");
     } else {
       getUserDetails();
     }

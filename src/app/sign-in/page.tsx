@@ -66,8 +66,13 @@ export default function LoginForm() {
         // Handle successful login (e.g., redirect to dashboard)
         localStorage.setItem("access_token", data.data.data.accessToken);
         localStorage.setItem("registered", data.data.data.registered);
+        localStorage.setItem("mobile_number", mobileNumber);
         showSuccessToast("Login successful");
-        router.push("/");
+        if (data.data.data.registered) {
+          router.push("/");
+        } else {
+          router.push("/select-account-type");
+        }
       } else {
         setError("Invalid OTP. Please try again.");
       }

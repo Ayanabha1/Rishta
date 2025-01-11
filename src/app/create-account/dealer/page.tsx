@@ -9,44 +9,52 @@ import debounce from "debounce-promise";
 import axios from "axios";
 import { API } from "@/lib/axios";
 import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import errorHandler from "@/lib/error-handler";
 
 export default function CreateAccount() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [accountInfo, setAccountInfo] = useState({
-    firstname: "",
-    lastname: "",
+    accountname: "",
+    mobile: "",
     email: "",
     address: "",
     mailingzip: "",
+    owner_name: "",
     salesofficername: "",
     accountholdername: "",
-    accountid: [],
     bankaccountnumber: "",
     ifsccode: "",
     bankname: "",
   });
   const router = useRouter();
+  const params = useParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("firstname", accountInfo.firstname);
-      formData.append("lastname", accountInfo.lastname);
-      formData.append("email", accountInfo.email);
+      const mobile_number = localStorage.getItem("mobile_number");
+      if (!mobile_number) {
+        showErrorToast("Mobile number not found");
+        router.push("/sign-in");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("registered");
+        return;
+      }
+      formData.append("owner_name", accountInfo.owner_name);
+      formData.append("accountname", accountInfo.accountname);
       formData.append("address", accountInfo.address);
       formData.append("mailingzip", accountInfo.mailingzip);
       formData.append("salesofficername", accountInfo.salesofficername);
       formData.append("accountholdername", accountInfo.accountholdername);
-      formData.append("accountid", accountInfo.accountid.join(","));
       formData.append("bankaccountnumber", accountInfo.bankaccountnumber);
       formData.append("ifsccode", accountInfo.ifsccode);
       formData.append("bankname", accountInfo.bankname);
-      await API.post("/createAccount", formData);
+      formData.append("mobile", mobile_number);
+      await API.post("/createDealer", formData);
       showSuccessToast("Account created successfully");
       localStorage.setItem("registered", "true");
       router.push("/");
@@ -125,22 +133,22 @@ export default function CreateAccount() {
             <h2 className="text-lg font-bold text-black">
               Personal Information
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label
-                  htmlFor="firstname"
+                  htmlFor="owner_name"
                   className="block text-sm font-medium text-black mb-1"
                 >
-                  First Name
+                  Owner Name
                 </label>
                 <input
                   type="text"
-                  id="firstname"
-                  name="firstname"
+                  id="owner_name"
+                  name="owner_name"
                   required
                   className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                   placeholder="Ayanabha"
-                  value={accountInfo.firstname}
+                  value={accountInfo.owner_name}
                   onChange={handleChange}
                   onInput={(e) => {
                     const regex = /^[a-zA-Z ]*$/;
@@ -161,60 +169,8 @@ export default function CreateAccount() {
                   }}
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="lastname"
-                  className="block text-sm font-medium text-black mb-1"
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="lastname"
-                  name="lastname"
-                  required
-                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                  placeholder="Misra"
-                  value={accountInfo.lastname}
-                  onChange={handleChange}
-                  onInput={(e) => {
-                    const regex = /^[a-zA-Z ]*$/;
-                    e.currentTarget.value = e.currentTarget.value.replace(
-                      /[^\p{L}\s]/gu,
-                      ""
-                    );
-                  }}
-                  onInvalid={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    if (target.validity.patternMismatch) {
-                      target.setCustomValidity(
-                        "Last name should only contain alphabets."
-                      );
-                    } else {
-                      target.setCustomValidity("");
-                    }
-                  }}
-                />
-              </div>
             </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="ayanabha2002@gmail.com"
-                value={accountInfo.email}
-                onChange={handleChange}
-              />
-            </div>
+
             <div>
               <label
                 htmlFor="address"
@@ -277,7 +233,7 @@ export default function CreateAccount() {
             </h2>
 
             {/* Multi-select Account Search */}
-
+            {/* 
             <Select
               cacheOptions
               loadOptions={getOptions}
@@ -286,7 +242,41 @@ export default function CreateAccount() {
               placeholder="Search accounts..."
               className="rounded-lg"
               required
-            />
+            /> */}
+
+            <div>
+              <label
+                htmlFor="accountname"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Account Name
+              </label>
+              <input
+                type="text"
+                id="accountname"
+                name="accountname"
+                required
+                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                placeholder="Super steel"
+                value={accountInfo.accountname}
+                onChange={handleChange}
+                pattern="[a-zA-Z ]*"
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "Account name should only contain alphabets."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
+              />
+            </div>
 
             <div>
               <label
