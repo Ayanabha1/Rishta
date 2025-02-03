@@ -10,7 +10,7 @@ const errorHandler = (
     return;
   }
 
-  if (error?.response && JSON.stringify(error?  .response) !== "{}") {
+  if (error?.response && JSON.stringify(error?.response) !== "{}") {
     if (error?.response?.status === 401) {
       // user unauthorized
       localStorage.removeItem("access_token");
