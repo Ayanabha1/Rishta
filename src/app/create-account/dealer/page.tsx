@@ -23,7 +23,6 @@ export default function CreateAccount() {
     city: "",
     mailingzip: "",
     owner_name: "",
-    salesofficername: "",
     accountholdername: "",
     bankaccountnumber: "",
     ifsccode: "",
@@ -52,7 +51,6 @@ export default function CreateAccount() {
       formData.append("address", accountInfo.address);
       formData.append("city", accountInfo.city);
       formData.append("mailingzip", accountInfo.mailingzip);
-      formData.append("salesofficername", accountInfo.salesofficername);
       formData.append("mobile", mobile_number);
       formData.append("accounttype", accountInfo.accounttype);
       formData.append("accountid", accountInfo.accountid);
@@ -335,40 +333,6 @@ export default function CreateAccount() {
                   if (target.validity.patternMismatch) {
                     target.setCustomValidity(
                       "Account name should only contain alphabets."
-                    );
-                  } else {
-                    target.setCustomValidity("");
-                  }
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="salesofficername"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Sales Officer Name
-              </label>
-              <input
-                type="text"
-                id="salesofficername"
-                name="salesofficername"
-                required
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="Rajib Singa"
-                value={accountInfo.salesofficername}
-                onChange={handleChange}
-                pattern="[a-zA-Z ]*"
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
-                }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.patternMismatch) {
-                    target.setCustomValidity(
-                      "Sales officer name should only contain alphabets."
                     );
                   } else {
                     target.setCustomValidity("");

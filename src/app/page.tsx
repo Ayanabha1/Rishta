@@ -115,7 +115,11 @@ export default function Page() {
           ) : (
             <div className="space-y-4 h-full flex flex-col">
               <StatsCard
-                title="Your Yearly Earnings"
+                title={
+                  userData?.accounttype === "Dealers"
+                    ? "Reward Points"
+                    : "Your Yearly Earnings"
+                }
                 value={userData?.["12monthearing"] || "0"}
                 icon={
                   userData?.accounttype === "Dealers" ? (
