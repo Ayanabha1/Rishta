@@ -303,7 +303,6 @@ export default function CreateAccount() {
                 onChange={handleAccountChange}
                 placeholder="Search Dealer"
                 className="rounded-lg"
-                required
               />
             </div>
 

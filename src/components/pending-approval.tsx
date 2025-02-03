@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "./ui/card";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import SupportModal from "./support-modal";
 
 type Props = {};
 
+const contactSupportOptions = {
+  address:
+    "4 NETAJI SUBHAS ROAD, 2ND FLOOR, ROOM NO -2, KOLKATA, Kolkata, West Bengal (700001)",
+  phone: "+91-7604027770",
+  email: "srijitasteel@gmail.com",
+};
+
 const PendingApproval = (props: Props) => {
+  const [showSupportModal, setShowSupportModal] = useState(false);
+
   return (
     <div className="rounded-lg overflow-y-scroll">
       <Card className="p-4 bg-yellow-100 border-l-4 border-yellow-500 space-y-2 mb-4">
@@ -45,10 +55,18 @@ const PendingApproval = (props: Props) => {
           If you have any questions about your application or need to update any
           information, please don't hesitate to contact our support team.
         </p>
-        <button className="w-full shadow-lg bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
+        <button
+          onClick={() => setShowSupportModal(true)}
+          className="w-full shadow-lg bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors"
+        >
           Contact Support
         </button>
       </Card>
+
+      <SupportModal
+        isOpen={showSupportModal}
+        onClose={() => setShowSupportModal(false)}
+      />
     </div>
   );
 };

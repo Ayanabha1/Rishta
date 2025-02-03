@@ -8,6 +8,7 @@ import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import { useUserStore } from "@/hooks/use-user";
 import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
 import { API } from "@/lib/axios";
+import Image from "next/image";
 
 export function Header({
   pendingForApproval,
@@ -27,9 +28,16 @@ export function Header({
 
   return (
     <header className="flex items-center justify-between py-4">
-      <button className="rounded-full p-2 hover:bg-white/20 transition-colors">
-        <Menu className="h-6 w-6 text-purple-900" />
-      </button>
+      <div className="relative">
+        <Image
+          src="/assets/logo.png"
+          alt="Company Logo"
+          width={60}
+          height={60}
+          className="object-contain"
+          priority
+        />
+      </div>
       <div className="flex items-center gap-2">
         <Link
           href="/profile"

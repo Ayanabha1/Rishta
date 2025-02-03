@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import errorHandler from "@/lib/error-handler";
 import { useUserStore } from "@/hooks/use-user";
+import Image from "next/image";
 
 export default function LoginForm() {
   const [mobileNumber, setmobileNumber] = useState("");
@@ -98,110 +99,123 @@ export default function LoginForm() {
       >
         <ArrowLeft className="h-5 w-5 " /> Home
       </Link>
-      <div className="relative overflow-hidden rounded-2xl w-full my-auto bg-white/10 backdrop-blur-md p-6 shadow-xl h-fit">
-        <h2 className="text-2xl font-bold text-purple-950 mb-2">
-          {step === "phone" ? "Login" : "Verify OTP"}
-        </h2>
-        <p className="text-sm text-purple-800 mb-6">
-          {step === "phone"
-            ? "Enter your phone number to receive an OTP"
-            : "Enter the OTP sent to your phone"}
-        </p>
-        {step === "phone" ? (
-          <form onSubmit={handleSendOTP} className="space-y-4">
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-purple-900 mb-1"
-              >
-                Phone Number
-              </label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="89********"
-                pattern="[0-9]{10}"
-                maxLength={10}
-                value={mobileNumber}
-                onChange={(e) => setmobileNumber(e.target.value)}
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^0-9]/g, "");
-                }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.patternMismatch) {
-                    target.setCustomValidity(
-                      "Phone number must be between 10 digits."
-                    );
-                  } else {
-                    target.setCustomValidity("");
+
+      <div className="flex flex-col w-full my-auto translate-y-[-10%]">
+        <div className="flex justify-center">
+          <Image
+            src="/assets/logo.png"
+            alt="Company Logo"
+            width={180}
+            height={180}
+            className="object-contain"
+            priority
+          />
+        </div>
+        <div className="relative overflow-hidden rounded-2xl w-full bg-white/10 backdrop-blur-md p-6 shadow-xl h-fit">
+          <h2 className="text-2xl font-bold text-purple-950 mb-2">
+            {step === "phone" ? "Login" : "Verify OTP"}
+          </h2>
+          <p className="text-sm text-purple-800 mb-6">
+            {step === "phone"
+              ? "Enter your phone number to receive an OTP"
+              : "Enter the OTP sent to your phone"}
+          </p>
+          {step === "phone" ? (
+            <form onSubmit={handleSendOTP} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-purple-900 mb-1"
+                >
+                  Phone Number
+                </label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="89********"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  value={mobileNumber}
+                  onChange={(e) => setmobileNumber(e.target.value)}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.value = target.value.replace(/[^0-9]/g, "");
+                  }}
+                  onInvalid={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    if (target.validity.patternMismatch) {
+                      target.setCustomValidity(
+                        "Phone number must be between 10 digits."
+                      );
+                    } else {
+                      target.setCustomValidity("");
+                    }
+                  }}
+                  required
+                  className="w-full bg-white/30 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <Button
+                type="submit"
+                className={cn(
+                  "w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg  border border-purple-600",
+                  {
+                    "cursor-not-allowed opacity-50": loading,
                   }
-                }}
-                required
-                className="w-full bg-white/30 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
-              />
-            </div>
-            <Button
-              type="submit"
-              className={cn(
-                "w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg  border border-purple-600",
-                {
-                  "cursor-not-allowed opacity-50": loading,
-                }
-              )}
-              disabled={loading}
-            >
-              Send OTP
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <div>
-              <label
-                htmlFor="otp"
-                className="block text-sm font-medium text-purple-900 mb-1"
+                )}
+                disabled={loading}
               >
-                OTP
-              </label>
-              <Input
-                id="otp"
-                type="text"
-                placeholder="Enter 6-digit OTP"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOTP(e.target.value)}
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^0-9]/g, "");
-                }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.patternMismatch) {
-                    target.setCustomValidity("OTP must be a 6 digit number.");
-                  } else {
-                    target.setCustomValidity("");
+                Send OTP
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOTP} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="otp"
+                  className="block text-sm font-medium text-purple-900 mb-1"
+                >
+                  OTP
+                </label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOTP(e.target.value)}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.value = target.value.replace(/[^0-9]/g, "");
+                  }}
+                  onInvalid={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    if (target.validity.patternMismatch) {
+                      target.setCustomValidity("OTP must be a 6 digit number.");
+                    } else {
+                      target.setCustomValidity("");
+                    }
+                  }}
+                  required
+                  className="w-full bg-white/30 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <Button
+                type="submit"
+                className={cn(
+                  "w-full bg-purple-600 hover:bg-purple-700 shadow-lg text-white",
+                  {
+                    "cursor-not-allowed opacity-50": loading,
                   }
-                }}
-                required
-                className="w-full bg-white/30 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
-              />
-            </div>
-            <Button
-              type="submit"
-              className={cn(
-                "w-full bg-purple-600 hover:bg-purple-700 shadow-lg text-white",
-                {
-                  "cursor-not-allowed opacity-50": loading,
-                }
-              )}
-            >
-              Verify OTP
-            </Button>
-          </form>
-        )}
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+                )}
+              >
+                Verify OTP
+              </Button>
+            </form>
+          )}
+          {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        </div>
       </div>
     </>
   );
