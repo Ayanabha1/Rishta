@@ -11,6 +11,7 @@ import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
+import { IndianRupee, StarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
@@ -101,8 +102,8 @@ export default function Page() {
       <div className="py-8 space-y-8 overflow-y-scroll h-full">
         <div className="-space-y-1">
           <h1 className="text-2xl font-semibold text-purple-950">Welcome</h1>
-          <p className="text-5xl font-bold text-purple-950">
-            {userData?.firstname}
+          <p className="text-4xl font-bold text-purple-950">
+            {userData?.firstname || userData?.owner_name}
           </p>
         </div>
 
@@ -116,9 +117,19 @@ export default function Page() {
               <StatsCard
                 title="Your Yearly Earnings"
                 value={userData?.["12monthearing"] || "0"}
+                icon={
+                  userData?.accounttype === "Dealers" ? (
+                    <StarIcon className="h-6 w-6 text-purple-950" />
+                  ) : (
+                    <IndianRupee className="h-6 w-6 text-purple-950" />
+                  )
+                }
               />
               <RecentTransactions
-                transactions={userData?.latest10paymenthistory || []}
+                transactions={
+                  userData?.latest10paymenthistory ||
+                  userData?.latest10pointhistory
+                }
               />
             </div>
           )}

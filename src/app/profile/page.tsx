@@ -17,6 +17,7 @@ import {
   DollarSign,
   BadgeInfo,
   LogOut,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -86,8 +87,12 @@ export default function ProfilePage() {
           ) : (
             <div className="relative w-24 h-24 mx-auto">
               <div className="w-full h-full rounded-full bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center text-3xl font-bold">
-                {userData?.firstname[0]}
-                {userData?.lastname[0]}
+                {userData?.accounttype === "Dealers"
+                  ? userData?.owner_name
+                      ?.split(" ")
+                      .map((name) => name[0])
+                      .join("")
+                  : `${userData?.firstname?.[0]}${userData?.lastname?.[0]}`}
               </div>
               {profilePending ? (
                 <div className="absolute -bottom-2 right-0 bg-yellow-500 rounded-full p-2">
@@ -105,19 +110,25 @@ export default function ProfilePage() {
             {loading ? (
               <div className="h-6 w-48 bg-black/10 rounded animate-pulse mx-auto"></div>
             ) : (
-              <h1 className="text-2xl font-bold ">{`${userData?.firstname} ${userData?.lastname}`}</h1>
+              <h1 className="text-2xl font-bold ">
+                {userData?.accounttype === "Dealers"
+                  ? userData?.owner_name
+                  : `${userData?.firstname} ${userData?.lastname}`}
+              </h1>
             )}
             <div className="flex items-center justify-center gap-2 mt-2">
               {loading ? (
                 <div className="h-6 w-48 bg-black/10 rounded animate-pulse mx-auto"></div>
               ) : (
-                <span
-                  className={`px-3 py-1 rounded-full text-xs ${
-                    profilePending ? "bg-yellow-500" : "bg-green-500"
-                  } text-black`}
-                >
-                  {userData?.status}
-                </span>
+                <>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs ${
+                      profilePending ? "bg-yellow-500" : "bg-green-500"
+                    } text-black`}
+                  >
+                    {userData?.status}
+                  </span>
+                </>
               )}
             </div>
           </div>
@@ -127,29 +138,50 @@ export default function ProfilePage() {
       {/* Content Sections */}
       <div className="mt-4 overflow-y-scroll rounded-lg bg-white/20 shadow">
         {/* Personal Information */}
-        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4  ">
-          <h2 className="text-lg font-semibold ">Personal Information</h2>
+        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
+          <h2 className="text-lg font-semibold">Personal Information</h2>
           <div className="space-y-3">
-            <div className="flex items-center gap-3 ">
-              <Mail className="w-5 h-5 text-pink-500" />
-              {loading ? (
-                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-              ) : (
-                <span className="/80 ">{userData?.email}</span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 ">
+            {userData?.accounttype === "Dealers" ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <Building2 className="w-5 h-5 text-pink-500" />
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
+                  ) : (
+                    <span className="/80">{userData?.accountname}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <User className="w-5 h-5 text-pink-500" />
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
+                  ) : (
+                    <span className="/80">{userData?.owner_name}</span>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-pink-500" />
+                {loading ? (
+                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
+                ) : (
+                  <span className="/80">{userData?.email}</span>
+                )}
+              </div>
+            )}
+            <div className="flex items-center gap-3">
               <Phone className="w-5 h-5 text-pink-500" />
               {loading ? (
-                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
               ) : (
                 <span className="/80">{userData?.mobile}</span>
               )}
             </div>
-            <div className="flex items-center gap-3 ">
+            <div className="flex items-center gap-3">
               <MapPin className="w-5 h-5 text-pink-500" />
               {loading ? (
-                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
               ) : (
                 <span className="/80">{userData?.address}</span>
               )}
@@ -157,92 +189,89 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Team Information */}
-        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4 ">
-          <h2 className="text-lg font-semibold ">Team Information</h2>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 ">
-              <User className="w-5 h-5 text-pink-500" />
-              <div>
-                <p className="text-xs /60">Sales Officer</p>
-                {loading ? (
-                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+        {/* Points/Earnings Section - Show differently for dealer */}
+        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
+          <h2 className="text-lg font-semibold">
+            {userData?.accounttype === "Dealers" ? "Points" : "Earnings"}
+          </h2>
+          <div className="flex items-center gap-3">
+            {userData?.accounttype === "Dealers" ? (
+              <>
+                <Star className="w-5 h-5 text-pink-500" />
+                <div>
+                  <p className="text-xs /60">Last 12 Months Points</p>
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
+                  ) : (
+                    <p className="/80 text-2xl font-bold">
+                      {userData?.["12monthpoints"]}
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {userData?.accounttype === "Dealers" ? (
+                  <Star className="w-5 h-5 text-pink-500" />
                 ) : (
-                  <p className="/80">{userData?.salesofficername}</p>
+                  <DollarSign className="w-5 h-5 text-pink-500" />
                 )}
-              </div>
-            </div>
-            <div className="flex items-center gap-3 ">
-              <User className="w-5 h-5 text-pink-500" />
-              <div>
-                <p className="text-xs /60">Account Holder</p>
-                {loading ? (
-                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                ) : (
-                  <p className="/80">{userData?.accountholdername}</p>
-                )}
-              </div>
-            </div>
+                <div>
+                  <p className="text-xs /60">Last 12 Months</p>
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
+                  ) : (
+                    <p className="/80 text-2xl font-bold">
+                      ₹{userData?.["12monthearing"]}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Bank Details */}
-        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
-          <h2 className="text-lg font-semibold ">Bank Details</h2>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 ">
-              <Building2 className="w-5 h-5 text-pink-500" />
-              <div>
-                <p className="text-xs /60">Bank Name</p>
-                {loading ? (
-                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                ) : (
-                  <p className="/80">{userData?.bankname}</p>
-                )}
+        {/* Only show Bank Details for Mason */}
+        {userData?.accounttype !== "Dealers" && (
+          <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
+            <h2 className="text-lg font-semibold">Bank Details</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 ">
+                <Building2 className="w-5 h-5 text-pink-500" />
+                <div>
+                  <p className="text-xs /60">Bank Name</p>
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                  ) : (
+                    <p className="/80">{userData?.bankname}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3 ">
-              <CreditCard className="w-5 h-5 text-pink-500" />
-              <div>
-                <p className="text-xs /60">Account Number</p>
-                {loading ? (
-                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                ) : (
-                  <p className="/80">{userData?.bankaccountnumber}</p>
-                )}
+              <div className="flex items-center gap-3 ">
+                <CreditCard className="w-5 h-5 text-pink-500" />
+                <div>
+                  <p className="text-xs /60">Account Number</p>
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                  ) : (
+                    <p className="/80">{userData?.bankaccountnumber}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3 ">
-              <Wallet className="w-5 h-5 text-pink-500" />
-              <div>
-                <p className="text-xs /60">IFSC Code</p>
-                {loading ? (
-                  <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                ) : (
-                  <p className="/80">{userData?.ifsccode}</p>
-                )}
+              <div className="flex items-center gap-3 ">
+                <Wallet className="w-5 h-5 text-pink-500" />
+                <div>
+                  <p className="text-xs /60">IFSC Code</p>
+                  {loading ? (
+                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                  ) : (
+                    <p className="/80">{userData?.ifsccode}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Earnings */}
-        <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
-          <h2 className="text-lg font-semibold ">Earnings</h2>
-          <div className="flex items-center gap-3 ">
-            <DollarSign className="w-5 h-5 text-pink-500" />
-            <div>
-              <p className="text-xs /60">Last 12 Months</p>
-              {loading ? (
-                <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-              ) : (
-                <p className="/80 text-2xl font-bold ">
-                  ₹{userData?.["12monthearing"]}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="pt-6">

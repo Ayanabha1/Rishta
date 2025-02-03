@@ -82,11 +82,16 @@ export default {
   				to: {
   					height: '0'
   				}
-  			}
+  			},
+  			'scanner-line': {
+  				'0%, 100%': { top: '0%' },
+  				'50%': { top: '100%' },
+  			},
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'scanner-line': 'scanner-line 3s ease-in-out infinite',
   		}
   	}
   },

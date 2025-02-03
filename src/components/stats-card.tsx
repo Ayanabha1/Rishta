@@ -7,6 +7,7 @@ interface StatsCardProps {
   subtitle?: string;
   showAvatars?: boolean;
   showChart?: boolean;
+  icon?: React.ReactNode;
 }
 
 export function StatsCard({
@@ -16,6 +17,7 @@ export function StatsCard({
   subtitle,
   showAvatars,
   showChart,
+  icon,
 }: StatsCardProps) {
   return (
     <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4">
@@ -23,7 +25,10 @@ export function StatsCard({
         <div className="space-y-1">
           <h3 className="text-lg font-semibold text-purple-950">{title}</h3>
           <div className="flex items-center gap-2">
-            <h3 className="text-4xl font-bold text-purple-950">₹{value}</h3>
+            <h3 className="text-4xl font-bold text-purple-950 flex items-center gap-2">
+              {icon}
+              {value}
+            </h3>
             {subtitle && (
               <span className="text-sm text-purple-800">{subtitle}</span>
             )}

@@ -20,6 +20,7 @@ export default function CreateAccount() {
     mobile: "",
     email: "",
     address: "",
+    city: "",
     mailingzip: "",
     owner_name: "",
     salesofficername: "",
@@ -27,6 +28,8 @@ export default function CreateAccount() {
     bankaccountnumber: "",
     ifsccode: "",
     bankname: "",
+    accounttype: "Dealers",
+    accountid: "",
   });
   const router = useRouter();
   const params = useParams();
@@ -47,13 +50,13 @@ export default function CreateAccount() {
       formData.append("owner_name", accountInfo.owner_name);
       formData.append("accountname", accountInfo.accountname);
       formData.append("address", accountInfo.address);
+      formData.append("city", accountInfo.city);
       formData.append("mailingzip", accountInfo.mailingzip);
       formData.append("salesofficername", accountInfo.salesofficername);
-      formData.append("accountholdername", accountInfo.accountholdername);
-      formData.append("bankaccountnumber", accountInfo.bankaccountnumber);
-      formData.append("ifsccode", accountInfo.ifsccode);
-      formData.append("bankname", accountInfo.bankname);
       formData.append("mobile", mobile_number);
+      formData.append("accounttype", accountInfo.accounttype);
+      formData.append("accountid", accountInfo.accountid);
+
       await API.post("/createDealer", formData);
       showSuccessToast("Account created successfully");
       localStorage.setItem("registered", "true");
@@ -96,7 +99,7 @@ export default function CreateAccount() {
     if (selectedOption) {
       setAccountInfo((prev) => ({
         ...prev,
-        accountid: selectedOption.map((item: any) => item.value),
+        accountid: selectedOption.value,
       }));
     }
   };
@@ -189,6 +192,41 @@ export default function CreateAccount() {
                 onChange={handleChange}
               />
             </div>
+
+            <div>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                City
+              </label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                required
+                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                placeholder="Mumbai"
+                value={accountInfo.city}
+                onChange={handleChange}
+                pattern="[A-Za-z ]*"
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/[^A-Za-z ]/g, "");
+                }}
+                onInvalid={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.validity.patternMismatch) {
+                    target.setCustomValidity(
+                      "City name should only contain letters and spaces."
+                    );
+                  } else {
+                    target.setCustomValidity("");
+                  }
+                }}
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="mailingzip"
@@ -232,17 +270,44 @@ export default function CreateAccount() {
               Account Information
             </h2>
 
-            {/* Multi-select Account Search */}
-            {/* 
-            <Select
-              cacheOptions
-              loadOptions={getOptions}
-              onChange={handleAccountChange}
-              isMulti
-              placeholder="Search accounts..."
-              className="rounded-lg"
-              required
-            /> */}
+            <div>
+              <label
+                htmlFor="type"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Type
+              </label>
+              <select
+                id="type"
+                name="type"
+                required
+                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                value={accountInfo.accounttype}
+                onChange={(e) =>
+                  setAccountInfo((prev) => ({ ...prev, type: e.target.value }))
+                }
+              >
+                <option value="Dealers">Dealer</option>
+                <option value="Business Partner">Business Partner</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="accountid"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Select Dealer
+              </label>
+              <Select
+                cacheOptions
+                loadOptions={getOptions}
+                onChange={handleAccountChange}
+                placeholder="Search Dealer"
+                className="rounded-lg"
+                required
+              />
+            </div>
 
             <div>
               <label
@@ -308,137 +373,6 @@ export default function CreateAccount() {
                   } else {
                     target.setCustomValidity("");
                   }
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Bank Details */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-black">Bank Details</h2>
-            <div>
-              <label
-                htmlFor="accountholdername"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Account Holder Name
-              </label>
-              <input
-                type="text"
-                id="accountholdername"
-                name="accountholdername"
-                required
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="Sunia Chouhan"
-                value={accountInfo.accountholdername}
-                onChange={handleChange}
-                pattern="[a-zA-Z ]*"
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
-                }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.patternMismatch) {
-                    target.setCustomValidity(
-                      "Account holder name should only contain alphabets."
-                    );
-                  } else {
-                    target.setCustomValidity("");
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="bankaccountnumber"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Bank Account Number
-              </label>
-              <input
-                type="text"
-                id="bankaccountnumber"
-                name="bankaccountnumber"
-                minLength={9}
-                maxLength={18}
-                required
-                pattern="[0-9]{9,18}"
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="145456564646434"
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^0-9]/g, "");
-                }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.patternMismatch) {
-                    target.setCustomValidity(
-                      "Bank account number must be between 9 and 18 digits."
-                    );
-                  } else {
-                    target.setCustomValidity("");
-                  }
-                }}
-                value={accountInfo.bankaccountnumber}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="ifsccode"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                IFSC Code
-              </label>
-              <input
-                type="text"
-                id="ifsccode"
-                name="ifsccode"
-                maxLength={11}
-                minLength={11}
-                style={{ textTransform: "uppercase" }}
-                required
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="SBIN0000789"
-                pattern="[A-Za-z0-9]{11}"
-                value={accountInfo.ifsccode}
-                onChange={handleChange}
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^A-Za-z0-9]/g, "");
-                }}
-                onInvalid={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.validity.patternMismatch) {
-                    target.setCustomValidity(
-                      "IFSC code must be 11 characters long."
-                    );
-                  } else {
-                    target.setCustomValidity("");
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="bankname"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Bank Name
-              </label>
-              <input
-                type="text"
-                id="bankname"
-                name="bankname"
-                required
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="United Bank Of India"
-                value={accountInfo.bankname}
-                onChange={handleChange}
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/[^\p{L}\s]/gu, "");
                 }}
               />
             </div>

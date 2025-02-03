@@ -13,11 +13,16 @@ interface IUser {
   status: string;
   "12monthearing": string;
   latest10paymenthistory: PaymentHistory[];
+  latest10pointhistory: PaymentHistory[];
+  accounttype: string;
+  accountname: string;
+  owner_name: string;
 }
 
 interface PaymentHistory {
   date: string;
-  amount: number;
+  amount?: number;
+  points?: number;
   status: string;
 }
 

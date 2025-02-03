@@ -21,12 +21,16 @@ const QRScanner = ({
       {isQRScannerOpen ? (
         <div className="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="p-4 bg-white w-[80%] rounded-md flex flex-col gap-2">
-            {/* Add your QR scanner component here */}
-            <Scanner
-              onScan={(result) => processQRScan(result, closeScanner)}
-              scanDelay={5000}
-              allowMultiple
-            />
+            <div className="relative">
+              {/* Add your QR scanner component here */}
+              <Scanner
+                onScan={(result) => processQRScan(result, closeScanner)}
+                scanDelay={5000}
+                allowMultiple
+              />
+              {/* Animated scanning line */}
+              <div className="absolute left-0 right-0 h-0.5 bg-purple-500 animate-scanner-line" />
+            </div>
             <Button
               className="mt-2 bg-purple-600 hover:bg-purple-700 w-full shadow-xl"
               onClick={() => closeScanner()}

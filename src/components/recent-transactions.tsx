@@ -2,7 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 
 interface Transaction {
   date: string;
-  amount: number;
+  amount?: number;
+  points?: number;
   status: string;
 }
 
@@ -33,7 +34,9 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 <p className="text-purple-700">{transaction.date}</p>
               </div>
               <span className="font-semibold text-purple-950">
-                ₹{transaction.amount.toLocaleString()}
+                {transaction.amount
+                  ? `₹${transaction.amount.toLocaleString()}`
+                  : `+${transaction.points} points`}
               </span>
             </li>
           ))
