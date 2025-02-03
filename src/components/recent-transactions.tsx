@@ -24,8 +24,8 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
         </button>
       </div>
       <ul className="space-y-2 overflow-y-scroll h-[90%]">
-        {transactions.length > 0 ? (
-          transactions.map((transaction, i) => (
+        {transactions?.length > 0 ? (
+          transactions?.map((transaction, i) => (
             <li key={i} className="flex items-start justify-between text-sm">
               <div>
                 <p className="font-medium text-purple-900">

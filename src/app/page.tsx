@@ -132,7 +132,8 @@ export default function Page() {
               <RecentTransactions
                 transactions={
                   userData?.latest10paymenthistory ||
-                  userData?.latest10pointhistory
+                  userData?.latest10pointhistory ||
+                  []
                 }
               />
             </div>
