@@ -270,19 +270,22 @@ export default function CreateAccount() {
 
             <div>
               <label
-                htmlFor="type"
+                htmlFor="accounttype"
                 className="block text-sm font-medium text-black mb-1"
               >
                 Type
               </label>
               <select
-                id="type"
-                name="type"
+                id="accounttype"
+                name="accounttype"
                 required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 value={accountInfo.accounttype}
                 onChange={(e) =>
-                  setAccountInfo((prev) => ({ ...prev, type: e.target.value }))
+                  setAccountInfo((prev) => ({
+                    ...prev,
+                    accounttype: e.target.value,
+                  }))
                 }
               >
                 <option value="Dealers">Dealer</option>

@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [userData, setUserData] = useState<IUser>();
   const [profilePending, setProfilePending] = useState(false);
   const [loading, setLoading] = useState(true);
+
   const getUserDetails = async () => {
     try {
       const data = await API.get("/getAccount");
@@ -87,7 +88,8 @@ export default function ProfilePage() {
           ) : (
             <div className="relative w-24 h-24 mx-auto">
               <div className="w-full h-full rounded-full bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center text-3xl font-bold">
-                {userData?.accounttype === "Dealers"
+                {userData?.accounttype === "Dealers" ||
+                userData?.accounttype === "Business Partner"
                   ? userData?.owner_name
                       ?.split(" ")
                       .map((name) => name[0])
@@ -111,7 +113,8 @@ export default function ProfilePage() {
               <div className="h-6 w-48 bg-black/10 rounded animate-pulse mx-auto"></div>
             ) : (
               <h1 className="text-2xl font-bold ">
-                {userData?.accounttype === "Dealers"
+                {userData?.accounttype === "Dealers" ||
+                userData?.accounttype === "Business Partner"
                   ? userData?.owner_name
                   : `${userData?.firstname} ${userData?.lastname}`}
               </h1>
@@ -141,7 +144,8 @@ export default function ProfilePage() {
         <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
           <h2 className="text-lg font-semibold">Personal Information</h2>
           <div className="space-y-3">
-            {userData?.accounttype === "Dealers" ? (
+            {userData?.accounttype === "Dealers" ||
+            userData?.accounttype === "Business Partner" ? (
               <>
                 <div className="flex items-center gap-3">
                   <Building2 className="w-5 h-5 text-pink-500" />
@@ -192,10 +196,14 @@ export default function ProfilePage() {
         {/* Points/Earnings Section - Show differently for dealer */}
         <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
           <h2 className="text-lg font-semibold">
-            {userData?.accounttype === "Dealers" ? "Points" : "Earnings"}
+            {userData?.accounttype === "Dealers" ||
+            userData?.accounttype === "Business Partner"
+              ? "Points"
+              : "Earnings"}
           </h2>
           <div className="flex items-center gap-3">
-            {userData?.accounttype === "Dealers" ? (
+            {userData?.accounttype === "Dealers" ||
+            userData?.accounttype === "Business Partner" ? (
               <>
                 <Star className="w-5 h-5 text-pink-500" />
                 <div>
@@ -211,11 +219,7 @@ export default function ProfilePage() {
               </>
             ) : (
               <>
-                {userData?.accounttype === "Dealers" ? (
-                  <Star className="w-5 h-5 text-pink-500" />
-                ) : (
-                  <DollarSign className="w-5 h-5 text-pink-500" />
-                )}
+                <DollarSign className="w-5 h-5 text-pink-500" />
                 <div>
                   <p className="text-xs /60">Last 12 Months</p>
                   {loading ? (
@@ -232,46 +236,47 @@ export default function ProfilePage() {
         </div>
 
         {/* Only show Bank Details for Mason */}
-        {userData?.accounttype !== "Dealers" && (
-          <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
-            <h2 className="text-lg font-semibold">Bank Details</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 ">
-                <Building2 className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">Bank Name</p>
-                  {loading ? (
-                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                  ) : (
-                    <p className="/80">{userData?.bankname}</p>
-                  )}
+        {userData?.accounttype !== "Dealers" &&
+          userData?.accounttype !== "Business Partner" && (
+            <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
+              <h2 className="text-lg font-semibold">Bank Details</h2>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 ">
+                  <Building2 className="w-5 h-5 text-pink-500" />
+                  <div>
+                    <p className="text-xs /60">Bank Name</p>
+                    {loading ? (
+                      <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                    ) : (
+                      <p className="/80">{userData?.bankname}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <CreditCard className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">Account Number</p>
-                  {loading ? (
-                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                  ) : (
-                    <p className="/80">{userData?.bankaccountnumber}</p>
-                  )}
+                <div className="flex items-center gap-3 ">
+                  <CreditCard className="w-5 h-5 text-pink-500" />
+                  <div>
+                    <p className="text-xs /60">Account Number</p>
+                    {loading ? (
+                      <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                    ) : (
+                      <p className="/80">{userData?.bankaccountnumber}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 ">
-                <Wallet className="w-5 h-5 text-pink-500" />
-                <div>
-                  <p className="text-xs /60">IFSC Code</p>
-                  {loading ? (
-                    <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
-                  ) : (
-                    <p className="/80">{userData?.ifsccode}</p>
-                  )}
+                <div className="flex items-center gap-3 ">
+                  <Wallet className="w-5 h-5 text-pink-500" />
+                  <div>
+                    <p className="text-xs /60">IFSC Code</p>
+                    {loading ? (
+                      <div className="h-6 w-48 bg-black/10 rounded animate-pulse "></div>
+                    ) : (
+                      <p className="/80">{userData?.ifsccode}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       <div className="pt-6">
