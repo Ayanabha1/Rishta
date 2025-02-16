@@ -17,7 +17,8 @@ import errorHandler from "@/lib/error-handler";
 export type DocumentType =
   | "Bank Statement"
   | "Cancel Cheque"
-  | "Bank Pass Book";
+  | "Bank Pass Book"
+  | "Profile Picture";
 
 export interface FileUpload {
   file: File;
@@ -33,6 +34,7 @@ export default function UploadPage() {
     { value: "Bank Statement", label: "Bank Statement" },
     { value: "Cancel Cheque", label: "Cancel Cheque" },
     { value: "Bank Pass Book", label: "Bank Pass Book" },
+    { value: "Profile Picture", label: "Profile Picture" },
   ];
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
