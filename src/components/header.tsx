@@ -12,9 +12,11 @@ import Image from "next/image";
 
 export function Header({
   pendingForApproval,
+  QRVisible,
   processQRScan,
 }: {
   pendingForApproval: boolean;
+  QRVisible: boolean;
   processQRScan: (
     data: IDetectedBarcode[],
     closeScanner: () => void
@@ -58,23 +60,25 @@ export function Header({
           )
         }
 
-        <button
-          className={cn(
-            "rounded-full p-2 hover:bg-white/20 transition-colors",
-            {
-              "cursor-not-allowed": pendingForApproval,
-            }
-          )}
-          onClick={() => {
-            if (pendingForApproval) {
-              showErrorToast("Please wait for approval");
-            } else {
-              setIsQRScannerOpen(true);
-            }
-          }}
-        >
-          <QrCode className="h-6 w-6 text-purple-900" />
-        </button>
+        {QRVisible && (
+          <button
+            className={cn(
+              "rounded-full p-2 hover:bg-white/20 transition-colors",
+              {
+                "cursor-not-allowed": pendingForApproval,
+              }
+            )}
+            onClick={() => {
+              if (pendingForApproval) {
+                showErrorToast("Please wait for approval");
+              } else {
+                setIsQRScannerOpen(true);
+              }
+            }}
+          >
+            <QrCode className="h-6 w-6 text-purple-900" />
+          </button>
+        )}
       </div>
       <QRScanner
         isQRScannerOpen={isQRScannerOpen}
