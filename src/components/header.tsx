@@ -1,6 +1,14 @@
 "use client";
 
-import { Menu, User, QrCode, FileUpIcon } from "lucide-react";
+import {
+  Menu,
+  User,
+  QrCode,
+  FileUpIcon,
+  List,
+  HardHat,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import QRScanner from "./QRScanner";
@@ -9,14 +17,22 @@ import { useUserStore } from "@/hooks/use-user";
 import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
 import { API } from "@/lib/axios";
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header({
   pendingForApproval,
   QRVisible,
+  MenuVisible,
   processQRScan,
 }: {
   pendingForApproval: boolean;
   QRVisible: boolean;
+  MenuVisible: boolean;
   processQRScan: (
     data: IDetectedBarcode[],
     closeScanner: () => void
@@ -40,6 +56,7 @@ export function Header({
           priority
         />
       </div>
+
       <div className="flex items-center gap-2">
         <Link
           href="/profile"
@@ -47,6 +64,27 @@ export function Header({
         >
           <User className="h-6 w-6 text-purple-900" />
         </Link>
+        {MenuVisible && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="rounded-full p-2 hover:bg-white/20 transition-colors">
+              <Menu className="h-6 w-6 text-purple-900" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-white/40">
+              <DropdownMenuItem asChild>
+                <Link href="/mason-list" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span>Mason List</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/mason-qr" className="flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  <span>Mason QR</span>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {
           // Only show the link if the user is pending for approval

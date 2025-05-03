@@ -15,6 +15,9 @@ export interface IUserDetails {
   status: string;
   "12monthearing": number;
   latest10paymenthistory: any[];
+  accounttype: string;
+  accountname: string;
+  owner_name: string;
 }
 
 export const useUserStore = create<IUserDetails>((set) => ({
@@ -32,6 +35,9 @@ export const useUserStore = create<IUserDetails>((set) => ({
   status: "Pending for Approval",
   "12monthearing": 150,
   latest10paymenthistory: [],
+  accounttype: "",
+  accountname: "",
+  owner_name: "",
   updateUserDetails: (data: Partial<IUserDetails>) =>
     set((state) => ({ ...state, ...data })),
 }));

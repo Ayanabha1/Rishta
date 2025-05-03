@@ -11,10 +11,14 @@ import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { IndianRupee, StarIcon } from "lucide-react";
+import { IndianRupee, StarIcon, Users, QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
   const [pendingForApproval, setPendingForApproval] = useState(false);
@@ -97,6 +101,7 @@ export default function Page() {
       <Header
         pendingForApproval={pendingForApproval}
         QRVisible={userData?.accounttype !== "Dealers"}
+        MenuVisible={userData?.accounttype === "Dealers"}
         processQRScan={processQRScan}
       />
 
@@ -108,7 +113,7 @@ export default function Page() {
           </p>
         </div>
 
-        <section className="overflow-hidden  flex flex-col h-[85%]">
+        <section className="overflow-hidden flex flex-col h-[85%]">
           {pendingForApproval ? (
             <div className="space-y-4 h-full flex flex-col">
               <PendingApproval />
