@@ -64,6 +64,27 @@ export function Header({
         >
           <User className="h-6 w-6 text-purple-900" />
         </Link>
+
+        {QRVisible && (
+          <button
+            className={cn(
+              "rounded-full p-2 hover:bg-white/20 transition-colors",
+              {
+                "cursor-not-allowed": pendingForApproval,
+              }
+            )}
+            onClick={() => {
+              if (pendingForApproval) {
+                showErrorToast("Please wait for approval");
+              } else {
+                setIsQRScannerOpen(true);
+              }
+            }}
+          >
+            <QrCode className="h-6 w-6 text-purple-900" />
+          </button>
+        )}
+
         {MenuVisible && (
           <DropdownMenu>
             <DropdownMenuTrigger className="rounded-full p-2 hover:bg-white/20 transition-colors ">
@@ -100,27 +121,8 @@ export function Header({
             </Link>
           )
         }
-
-        {QRVisible && (
-          <button
-            className={cn(
-              "rounded-full p-2 hover:bg-white/20 transition-colors",
-              {
-                "cursor-not-allowed": pendingForApproval,
-              }
-            )}
-            onClick={() => {
-              if (pendingForApproval) {
-                showErrorToast("Please wait for approval");
-              } else {
-                setIsQRScannerOpen(true);
-              }
-            }}
-          >
-            <QrCode className="h-6 w-6 text-purple-900" />
-          </button>
-        )}
       </div>
+
       <QRScanner
         isQRScannerOpen={isQRScannerOpen}
         closeScanner={closeScanner}

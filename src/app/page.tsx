@@ -100,7 +100,7 @@ export default function Page() {
     <section className="px-4 w-full h-full flex flex-col">
       <Header
         pendingForApproval={pendingForApproval}
-        QRVisible={userData?.accounttype !== "Dealers"}
+        QRVisible={true}
         MenuVisible={userData?.accounttype === "Dealers"}
         processQRScan={processQRScan}
       />
