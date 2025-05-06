@@ -60,16 +60,19 @@ export function Header({
       <div className="flex items-center gap-2">
         <Link
           href="/profile"
-          className="rounded-full p-2 hover:bg-white/20 transition-colors"
+          className="rounded-full p-2 hover:bg-white/20 transition-colors "
         >
           <User className="h-6 w-6 text-purple-900" />
         </Link>
         {MenuVisible && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="rounded-full p-2 hover:bg-white/20 transition-colors">
+            <DropdownMenuTrigger className="rounded-full p-2 hover:bg-white/20 transition-colors ">
               <Menu className="h-6 w-6 text-purple-900" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white/40">
+            <DropdownMenuContent
+              align="end"
+              className="w-56 bg-white/40 backdrop-blur-lg shadow-lg"
+            >
               <DropdownMenuItem asChild>
                 <Link href="/mason-list" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />

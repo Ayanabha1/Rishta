@@ -66,12 +66,25 @@ export default function MasonQRPage() {
     }
   };
 
+  const handleQRClose = async (qrCode: string) => {
+    try {
+      // TODO: Add Firebase event handling here
+      console.log("QR Code closed:", qrCode);
+      // Close the QR dialog
+      setQrDialogOpen(false);
+      // Refresh the QR list
+      await fetchQRs();
+    } catch (error) {
+      errorHandler(error);
+    }
+  };
+
   useEffect(() => {
     fetchQRs();
   }, [page, limit, brand]);
 
   return (
-    <div className="w-full p-4 pb-8 flex flex-col">
+    <div className="w-full p-4 pb-8 flex flex-col h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-8 -mx-4 px-4 py-2 relative">
         <Link
@@ -85,10 +98,10 @@ export default function MasonQRPage() {
         </div>
       </div>
 
-      <div className="glassmorphic-card rounded-lg shadow-sm p-6 min-h-[80vh] overflow-y-hidden relative">
-        <div className="flex gap-4 mb-6">
+      <div className="glassmorphic-card rounded-lg shadow-sm p-6 relative w-full h-[calc(100vh-8rem)] flex flex-col">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
           {brands.length > 0 && (
-            <div className="bg-white/40 rounded-md">
+            <div className="rounded-md bg-white/40 w-full sm:w-fit">
               <Select
                 value={brand}
                 onValueChange={(value) => {
@@ -96,7 +109,7 @@ export default function MasonQRPage() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Filter by brand" />
                 </SelectTrigger>
                 <SelectContent>
@@ -111,7 +124,7 @@ export default function MasonQRPage() {
             </div>
           )}
 
-          <div className="bg-white/40 rounded-md">
+          <div className="bg-white/40 w-full sm:w-fit rounded-md">
             <Select
               value={limit.toString()}
               onValueChange={(value) => {
@@ -119,7 +132,7 @@ export default function MasonQRPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Items per page" />
               </SelectTrigger>
               <SelectContent>
@@ -132,57 +145,60 @@ export default function MasonQRPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex justify-center items-center flex-1">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto h-[82%] py-2 px-1 pb-20">
+            <div className="flex flex-col gap-4 h-[85%] overflow-y-auto">
               {qrs.map((qr) => (
                 <button
                   key={qr.qrcode}
-                  className="glassmorphic-card p-4 flex flex-col items-center gap-2 shadow-md h-fit w-full cursor-pointer hover:bg-purple-50 transition"
+                  className="glassmorphic-card p-4 hover:bg-white/20 transition-colors rounded-lg h-fit shadow-md flex flex-col"
                   onClick={() => handleQrClick(qr.qrcode)}
                 >
-                  <div className="p-3 rounded-full bg-purple-100">
-                    <QrCode className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-purple-700 mt-2">
-                      Available for {qr.available_days} days
-                    </p>
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-purple-100">
+                      <QrCode className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm text-purple-700">
+                        <span className="font-medium text-purple-700">
+                          Expires in{" "}
+                        </span>
+                        {qr.available_days} days
+                      </p>
+                    </div>
                   </div>
                 </button>
               ))}
             </div>
 
             {qrs.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 flex-1 flex items-center justify-center">
                 No QR codes found
               </div>
             )}
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 backdrop-blur-sm">
-              <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                  Showing {qrs.length} of {total} QR codes
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((p) => p + 1)}
-                    disabled={qrs.length < limit}
-                  >
-                    Next
-                  </Button>
-                </div>
+            <div className="mt-auto flex justify-between items-center">
+              <div className="text-sm text-gray-600">
+                Showing {qrs.length} of {total} QR codes
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={qrs.length < limit}
+                >
+                  Next
+                </Button>
               </div>
             </div>
           </>
