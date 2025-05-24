@@ -18,6 +18,8 @@ import { v4 as uuid4 } from "uuid";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { database } from "@/lib/firebase";
+import { ref, set } from "firebase/database";
 
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
@@ -57,10 +59,21 @@ export default function Page() {
     try {
       const formData = new FormData();
       formData.append("qrnumber", qrNumber);
-      const data = await API.post("/scanQR", formData);
-      showSuccessToast(data.data.data.message || "QR scanned successfully");
-      closeScanner();
+      // const response = await API.post("/scanQR", formData);
+
+      // Update Firebase to notify QR display
+      const qrRef = ref(database, `qr_scans/${qrNumber}`);
+      await set(qrRef, {
+        scanned: true,
+        timestamp: Date.now(),
+        scannedBy: userData?.firstname || userData?.owner_name,
+      }).then(() => {
+        console.log("Sent to Firebase");
+      });
+
       getUserDetails();
+      showSuccessToast("QR scanned successfully");
+      closeScanner();
     } catch (error) {
       closeScanner();
       errorHandler(error);
