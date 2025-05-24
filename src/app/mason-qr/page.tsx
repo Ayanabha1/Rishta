@@ -353,7 +353,7 @@ export default function MasonQRPage() {
 
               {/* Success Message */}
               {scannedQR && currentQRRef.current === scannedQR && (
-                <div className="flex flex-col items-center gap-2 animate-fade-in bg-green-50 p-4 rounded-lg border border-green-100">
+                <div className="flex flex-col text-left items-center gap-2 animate-fade-in bg-green-50 p-4 rounded-lg border border-green-100">
                   <div className="flex items-center gap-2 text-green-600 font-medium">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -367,9 +367,11 @@ export default function MasonQRPage() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>QR Code Scanned Successfully!</span>
+                    <span className="text-left">
+                      QR Code Scanned Successfully!
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 text-left">
                     Scanned by{" "}
                     <span className="font-medium text-purple-600">
                       {scannedBy}
