@@ -59,7 +59,7 @@ export default function Page() {
     try {
       const formData = new FormData();
       formData.append("qrnumber", qrNumber);
-      // const response = await API.post("/scanQR", formData);
+      const response = await API.post("/scanQR", formData);
 
       // Update Firebase to notify QR display
       const qrRef = ref(database, `qr_scans/${qrNumber}`);
@@ -67,14 +67,17 @@ export default function Page() {
         scanned: true,
         timestamp: Date.now(),
         scannedBy: userData?.firstname || userData?.owner_name,
+        mobileNumber: userData?.mobile,
+        qrCode: qrNumber,
       }).then(() => {
         console.log("Sent to Firebase");
       });
 
       getUserDetails();
-      showSuccessToast("QR scanned successfully");
+      showSuccessToast(response?.data?.message || "QR scanned successfully");
       closeScanner();
     } catch (error) {
+      console.log(error);
       closeScanner();
       errorHandler(error);
     }
