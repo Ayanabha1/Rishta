@@ -301,7 +301,7 @@ export default function MasonQRPage() {
           setQrDialogOpen(open);
         }}
       >
-        <DialogContent className="flex flex-col items-center justify-center bg-white/80 backdrop-blur-md w-fit p-8 border-none rounded-2xl shadow-xl">
+        <DialogContent className="flex flex-col items-center justify-center bg-white/80 backdrop-blur-md w-[90%] p-8 border-none rounded-2xl shadow-xl">
           {qrLoading ? (
             <div className="flex flex-col items-center justify-center h-64 w-64 gap-4">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
