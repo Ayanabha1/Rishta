@@ -97,13 +97,13 @@ export function Header({
               <DropdownMenuItem asChild>
                 <Link href="/mason-list" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  <span>Mason List</span>
+                  <span>Masons</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/mason-qr" className="flex items-center gap-2">
                   <QrCode className="h-4 w-4" />
-                  <span>Mason QR</span>
+                  <span>QRs</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

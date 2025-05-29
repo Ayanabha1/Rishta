@@ -4,11 +4,13 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import { Providers } from "../components/providers";
 import ServiceWorkerRegister from "../utils/registerSW";
+import RightClickPreventer from "@/components/right-click-preventer";
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
+
 export const metadata: Metadata = {
   title: "Rishta",
   description: "Make stronger bonds",
@@ -25,6 +27,7 @@ export default function RootLayout({
         <body
           className={`${poppins.className} antialiased flex min-h-screen w-full items-center justify-center bg-gray-900 p-0`}
         >
+          <RightClickPreventer />
           <main className="relative h-screen max-w-[480px] w-full overflow-hidden  bg-gradient p-4 flex">
             <ServiceWorkerRegister />
             {children}
