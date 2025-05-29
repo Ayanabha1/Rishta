@@ -29,9 +29,11 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
             <li key={i} className="flex items-start justify-between text-sm">
               <div>
                 <p className="font-medium text-purple-900">
-                  {transaction.status}
+                  {transaction.status || "Pending"}
                 </p>
-                <p className="text-purple-700">{transaction.date}</p>
+                <p className="text-purple-700">
+                  {transaction.date || "2025-05-03"}
+                </p>
               </div>
               <span className="font-semibold text-purple-950">
                 {transaction.amount

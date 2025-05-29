@@ -11,10 +11,16 @@ import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { IndianRupee, StarIcon } from "lucide-react";
+import { IndianRupee, StarIcon, Users, QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { database } from "@/lib/firebase";
+import { ref, set } from "firebase/database";
+
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
   const [pendingForApproval, setPendingForApproval] = useState(false);
@@ -53,11 +59,25 @@ export default function Page() {
     try {
       const formData = new FormData();
       formData.append("qrnumber", qrNumber);
-      const data = await API.post("/scanQR", formData);
-      showSuccessToast(data.data.data.message || "QR scanned successfully");
-      closeScanner();
+      const response = await API.post("/scanQR", formData);
+
+      // Update Firebase to notify QR display
+      const qrRef = ref(database, `qr_scans/${qrNumber}`);
+      await set(qrRef, {
+        scanned: true,
+        timestamp: Date.now(),
+        scannedBy: userData?.firstname || userData?.owner_name,
+        mobileNumber: userData?.mobile,
+        qrCode: qrNumber,
+      }).then(() => {
+        console.log("Sent to Firebase");
+      });
+
       getUserDetails();
+      showSuccessToast(response?.data?.message || "QR scanned successfully");
+      closeScanner();
     } catch (error) {
+      console.log(error);
       closeScanner();
       errorHandler(error);
     }
@@ -96,7 +116,8 @@ export default function Page() {
     <section className="px-4 w-full h-full flex flex-col">
       <Header
         pendingForApproval={pendingForApproval}
-        QRVisible={userData?.accounttype !== "Dealers"}
+        QRVisible={true}
+        MenuVisible={userData?.accounttype === "Dealers"}
         processQRScan={processQRScan}
       />
 
@@ -108,7 +129,7 @@ export default function Page() {
           </p>
         </div>
 
-        <section className="overflow-hidden  flex flex-col h-[85%]">
+        <section className="overflow-hidden flex flex-col h-[85%]">
           {pendingForApproval ? (
             <div className="space-y-4 h-full flex flex-col">
               <PendingApproval />
