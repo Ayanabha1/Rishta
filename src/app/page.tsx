@@ -117,7 +117,10 @@ export default function Page() {
       <Header
         pendingForApproval={pendingForApproval}
         QRVisible={true}
-        MenuVisible={userData?.accounttype === "Dealers"}
+        MenuVisible={
+          userData?.accounttype === "Dealers" ||
+          userData?.accounttype === "Business Partner"
+        }
         processQRScan={processQRScan}
       />
 
@@ -138,13 +141,15 @@ export default function Page() {
             <div className="space-y-4 h-full flex flex-col">
               <StatsCard
                 title={
-                  userData?.accounttype === "Dealers"
+                  userData?.accounttype === "Dealers" ||
+                  userData?.accounttype === "Business Partner"
                     ? "Reward Points"
                     : "Your Yearly Earnings"
                 }
                 value={userData?.["12monthearing"] || "0"}
                 icon={
-                  userData?.accounttype === "Dealers" ? (
+                  userData?.accounttype === "Dealers" ||
+                  userData?.accounttype === "Business Partner" ? (
                     <StarIcon className="h-6 w-6 text-purple-950" />
                   ) : (
                     <IndianRupee className="h-6 w-6 text-purple-950" />
