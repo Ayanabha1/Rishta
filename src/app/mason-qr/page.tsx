@@ -69,7 +69,7 @@ export default function MasonQRPage() {
     }
     try {
       const response = await API.get<ISubdealerSearchResponse>(
-        `/searchAccount?query=${query}`
+        `/searchAccount?query=${query}&subdealeronly=yes`
       );
       return response.data.data.map((subdealer) => ({
         value: subdealer.accountid,
