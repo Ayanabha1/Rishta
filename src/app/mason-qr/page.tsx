@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { API } from "@/lib/axios";
 import { IMasonQR, IMasonQRResponse } from "@/interfaces/IMasonQR";
-import { ArrowLeft, QrCode } from "lucide-react";
+import { ISubdealer, ISubdealerSearchResponse } from "@/interfaces/ISubdealer";
+import { ArrowLeft, QrCode, Share2, Check } from "lucide-react";
 import Link from "next/link";
 import errorHandler from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,10 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { database } from "@/lib/firebase";
 import { ref, onValue, off } from "firebase/database";
-import { showSuccessToast } from "@/lib/utils";
+import { showSuccessToast, showErrorToast } from "@/lib/utils";
+import { useUserStore } from "@/hooks/use-user";
+import AsyncSelect from "react-select/async";
+import debounce from "debounce-promise";
 
 export default function MasonQRPage() {
   const [qrs, setQrs] = useState<IMasonQR[]>([]);
@@ -36,6 +40,111 @@ export default function MasonQRPage() {
   const [listenerCleanup, setListenerCleanup] = useState<(() => void) | null>(
     null
   );
+
+  // Share Coupon states
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [selectedQRs, setSelectedQRs] = useState<IMasonQR[]>([]);
+  const [selectedSubdealer, setSelectedSubdealer] = useState<ISubdealer | null>(
+    null
+  );
+  const [transferLoading, setTransferLoading] = useState(false);
+
+  // Add state for modal pagination
+  const [modalPage, setModalPage] = useState(1);
+  const modalLimit = 5; // QRs per page in modal
+  const paginatedSelectedQRs = selectedQRs.slice(
+    (modalPage - 1) * modalLimit,
+    modalPage * modalLimit
+  );
+  const totalModalPages = Math.ceil(selectedQRs.length / modalLimit);
+
+  const user = useUserStore();
+  const isDealer =
+    user.accounttype === "Dealers" || user.accounttype === "Business Partner";
+
+  // Subdealer search function
+  const searchSubdealers = debounce(async (query: string) => {
+    if (!query) {
+      return Promise.resolve([]);
+    }
+    try {
+      const response = await API.get<ISubdealerSearchResponse>(
+        `/searchAccount?query=${query}&subdealeronly=yes`
+      );
+      return response.data.data.map((subdealer) => ({
+        value: subdealer.accountid,
+        label: subdealer.accountname,
+      }));
+    } catch (error) {
+      console.error("Error searching subdealers:", error);
+      showErrorToast("Failed to search subdealers");
+      return [];
+    }
+  }, 1000);
+
+  // Handle QR selection
+  const handleQRSelection = (qr: IMasonQR) => {
+    setSelectedQRs((prev) => {
+      const isSelected = prev.some(
+        (selected) => selected.qrrewardsid === qr.qrrewardsid
+      );
+      if (isSelected) {
+        return prev.filter(
+          (selected) => selected.qrrewardsid !== qr.qrrewardsid
+        );
+      } else {
+        return [...prev, qr];
+      }
+    });
+  };
+
+  // Select all QRs
+  const handleSelectAll = () => {
+    if (selectedQRs.length === qrs.length) {
+      setSelectedQRs([]);
+    } else {
+      setSelectedQRs([...qrs]);
+    }
+  };
+
+  // Transfer QRs to subdealer
+  const handleTransferQRs = async () => {
+    if (selectedQRs.length === 0) {
+      showErrorToast("Please select at least one QR");
+      return;
+    }
+    if (!selectedSubdealer) {
+      showErrorToast("Please select a subdealer");
+      return;
+    }
+
+    setTransferLoading(true);
+    try {
+      const qrIds = selectedQRs.map((qr) => qr.qrrewardsid).join(",");
+      await API.get(
+        `/dealer/transferQrs?qrids=${qrIds}&subdealerid=${selectedSubdealer.accountid}`
+      );
+      showSuccessToast(`${selectedQRs.length} QR(s) transferred successfully`);
+      setShareDialogOpen(false);
+      setSelectedQRs([]);
+      setSelectedSubdealer(null);
+      // Refresh QR list
+      await fetchQRs();
+    } catch (error) {
+      errorHandler(error);
+    } finally {
+      setTransferLoading(false);
+    }
+  };
+
+  // Handle bulk share click
+  const handleBulkShare = () => {
+    if (selectedQRs.length === 0) {
+      showErrorToast("Please select at least one QR to share");
+      return;
+    }
+    setShareDialogOpen(true);
+  };
 
   const fetchQRs = async () => {
     try {
@@ -137,6 +246,20 @@ export default function MasonQRPage() {
     }
   };
 
+  // Deselect QR from modal
+  const handleDeselectQRInModal = (qrid: number) => {
+    setSelectedQRs((prev) => prev.filter((qr) => qr.qrrewardsid !== qrid));
+    // If last QR on page is removed, go to previous page if needed
+    if (paginatedSelectedQRs.length === 1 && modalPage > 1) {
+      setModalPage(modalPage - 1);
+    }
+  };
+
+  // Reset modal page when opening/closing
+  useEffect(() => {
+    if (shareDialogOpen) setModalPage(1);
+  }, [shareDialogOpen]);
+
   useEffect(() => {
     fetchQRs();
   }, [page, limit, brand]);
@@ -162,6 +285,11 @@ export default function MasonQRPage() {
     }
   }, [qrDialogOpen]);
 
+  // Reset selected QRs when pagination or brand changes
+  useEffect(() => {
+    setSelectedQRs([]);
+  }, [limit, page, brand]);
+
   return (
     <div className="w-full p-4 pb-8 flex flex-col h-screen">
       {/* Header */}
@@ -177,104 +305,170 @@ export default function MasonQRPage() {
         </div>
       </div>
 
-      <div className="glassmorphic-card rounded-lg shadow-sm p-6 relative w-full h-[calc(100vh-8rem)] flex flex-col">
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          {brands.length > 0 && (
-            <div className="rounded-md bg-white/40 w-full sm:w-fit">
+      <div className="glassmorphic-card rounded-2xl shadow-lg p-4 sm:p-6 relative w-full h-[calc(100vh-8rem)] flex flex-col">
+        {/* Filters and Actions Section */}
+        <div className="space-y-3 mb-6">
+          {/* Filters Row */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            {brands.length > 0 && (
+              <div className="rounded-lg bg-white/60 w-full sm:w-fit">
+                <Select
+                  value={brand}
+                  onValueChange={(value) => {
+                    setBrand(value);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]  text-base">
+                    <SelectValue placeholder="Filter by brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Brands</SelectItem>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand} value={brand}>
+                        {brand}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="bg-white/60 w-full sm:w-fit rounded-lg">
               <Select
-                value={brand}
+                value={limit.toString()}
                 onValueChange={(value) => {
-                  setBrand(value);
+                  setLimit(parseInt(value));
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by brand" />
+                <SelectTrigger className="w-full sm:w-[180px] text-base">
+                  <SelectValue placeholder="Items per page" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Brands</SelectItem>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand} value={brand}>
-                      {brand}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="5">5 per page</SelectItem>
+                  <SelectItem value="10">10 per page</SelectItem>
+                  <SelectItem value="20">20 per page</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          )}
-
-          <div className="bg-white/40 w-full sm:w-fit rounded-md">
-            <Select
-              value={limit.toString()}
-              onValueChange={(value) => {
-                setLimit(parseInt(value));
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Items per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 per page</SelectItem>
-                <SelectItem value="10">10 per page</SelectItem>
-                <SelectItem value="20">20 per page</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
+
+          {/* Bulk Share Actions - Only show for dealers */}
+          {isDealer && (
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full">
+              <Button
+                onClick={handleSelectAll}
+                variant="outline"
+                size="sm"
+                className="rounded-md font-medium px-4 py-2"
+              >
+                {selectedQRs.length === qrs.length
+                  ? "Deselect All"
+                  : "Select All"}
+              </Button>
+              <Button
+                onClick={handleBulkShare}
+                disabled={selectedQRs.length === 0}
+                className="bg-purple-500 hover:bg-blue-600 text-white rounded-md font-semibold shadow-sm px-4 py-2"
+                size="sm"
+              >
+                <Share2 className="h-4 w-4 mr-1" />
+                Share{selectedQRs.length > 0 ? ` (${selectedQRs.length})` : ""}
+              </Button>
+            </div>
+          )}
         </div>
 
+        {/* QR List */}
         {loading ? (
           <div className="flex justify-center items-center flex-1">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-4 h-[85%] overflow-y-auto">
-              {qrs.map((qr) => (
-                <button
-                  key={qr.qrcode}
-                  className="glassmorphic-card p-4 hover:bg-white/20 transition-colors rounded-lg h-fit shadow-md flex flex-col"
-                  onClick={() => handleQrClick(qr.qrcode)}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-full bg-purple-100">
-                      <QrCode className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm text-purple-700">
-                        <span className="font-medium text-purple-700">
-                          Expires in{" "}
-                        </span>
-                        {qr.available_days} days
-                      </p>
+            <div className="flex flex-col gap-4 h-[85%] px-1 py-1 pb-10 overflow-y-auto">
+              {qrs.map((qr) => {
+                const isSelected = selectedQRs.some(
+                  (selected) => selected.qrrewardsid === qr.qrrewardsid
+                );
+                return (
+                  <div
+                    key={qr.qrcode}
+                    className={`glassmorphic-card p-4 hover:bg-white/30 transition-colors rounded-xl h-fit shadow-md flex flex-col border border-transparent ${
+                      isSelected
+                        ? "ring-2 ring-blue-400 bg-blue-50/60 border-blue-200"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-4 flex-1">
+                        {/* Checkbox for selection - Only show for dealers */}
+                        {isDealer && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleQRSelection(qr);
+                            }}
+                            className={`size-4 rounded border-2 flex items-center justify-center transition-colors
+                            ${
+                              isSelected
+                                ? "bg-blue-500 border-blue-500"
+                                : "bg-white border-gray-300 hover:border-blue-400"
+                            }
+                            `}
+                          >
+                            {isSelected && (
+                              <Check className="h-4 w-4 text-white" />
+                            )}
+                          </button>
+                        )}
+
+                        <button
+                          className="flex items-center gap-4 flex-1"
+                          onClick={() => handleQrClick(qr.qrcode)}
+                        >
+                          <div className="p-3 rounded-full bg-purple-100">
+                            <QrCode className="h-7 w-7 text-purple-600" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-base font-semibold text-purple-700">
+                              <span className="font-medium text-purple-700">
+                                Expires in {qr.available_days} days
+                              </span>
+                            </p>
+                          </div>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
 
-            {qrs.length === 0 && (
-              <div className="text-center py-8 text-gray-500 flex-1 flex items-center justify-center">
-                No QR codes found
-              </div>
-            )}
-
-            <div className="mt-auto flex justify-between items-center">
-              <div className="text-sm text-gray-600">
-                Showing {qrs.length} of {total} QR codes
-              </div>
-              <div className="flex gap-2">
+            {/* Modern Pagination Bar */}
+            <div className="w-full flex justify-center items-center mt-4">
+              <div className="flex gap-2 bg-white/60 rounded-xl px-4 py-2 shadow-sm">
+                <span className="text-gray-700 text-sm font-medium flex items-center">
+                  Showing {Math.min((page - 1) * limit + 1, total)}-
+                  {Math.min(page * limit, total)} of {total} QR codes
+                </span>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
+                  className="rounded-lg px-3 font-semibold"
                 >
                   Previous
                 </Button>
+                <span className="text-base font-medium px-2 mt-1">{page}</span>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={qrs.length < limit}
+                  className="rounded-lg px-3 font-semibold"
                 >
                   Next
                 </Button>
@@ -284,6 +478,7 @@ export default function MasonQRPage() {
         )}
       </div>
 
+      {/* QR Display Dialog */}
       <Dialog
         open={qrDialogOpen}
         onOpenChange={(open) => {
@@ -399,6 +594,155 @@ export default function MasonQRPage() {
               <p>Failed to load QR image</p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Coupon Dialog */}
+      <Dialog
+        open={shareDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedSubdealer(null);
+          }
+          setShareDialogOpen(open);
+        }}
+      >
+        <DialogContent className="bg-white/90 backdrop-blur-md w-[95%] max-w-lg border-none rounded-2xl shadow-xl">
+          <div className="">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-purple-900">
+                Share QRs
+              </h3>
+              {/* <p className="text-sm text-gray-600">
+                Review and confirm the QR coupons you want to share
+              </p> */}
+            </div>
+
+            {/* Paginated QR List in Modal */}
+            {/* <div className="flex flex-col gap-3 items-center">
+              {paginatedSelectedQRs.length === 0 ? (
+                <div className="text-gray-500 text-center py-8">
+                  No QRs selected.
+                </div>
+              ) : (
+                paginatedSelectedQRs.map((qr) => (
+                  <div
+                    key={qr.qrrewardsid}
+                    className="flex items-center justify-between w-full bg-purple-50 rounded-lg px-4 py-2 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-purple-100">
+                        <QrCode className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <span className="font-medium text-purple-800 text-sm">
+                        Expires in {qr.available_days} days
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleDeselectQRInModal(qr.qrrewardsid)}
+                      className="ml-2 px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 text-xs font-semibold"
+                      title="Remove from selection"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))
+              )}
+            </div> */}
+
+            {/* Pagination Controls in Modal */}
+            {/* {selectedQRs.length > modalLimit && (
+              <div className="flex justify-center items-center gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setModalPage((p) => Math.max(1, p - 1))}
+                  disabled={modalPage === 1}
+                  className="rounded-lg px-3 font-semibold"
+                >
+                  Previous
+                </Button>
+                <span className="text-base font-medium px-2 mt-1">
+                  {modalPage} / {totalModalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setModalPage((p) => Math.min(totalModalPages, p + 1))
+                  }
+                  disabled={modalPage === totalModalPages}
+                  className="rounded-lg px-3 font-semibold"
+                >
+                  Next
+                </Button>
+              </div>
+            )} */}
+
+            {/* Subdealer Search and Share */}
+            <div className="space-y-4 pt-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Search Subdealer
+                </label>
+                <AsyncSelect
+                  loadOptions={searchSubdealers}
+                  onChange={(option) => {
+                    if (option) {
+                      setSelectedSubdealer({
+                        accountid: option.value,
+                        accountname: option.label,
+                      });
+                    } else {
+                      setSelectedSubdealer(null);
+                    }
+                  }}
+                  placeholder="Type to search subdealers..."
+                  className="rounded-lg"
+                  isClearable
+                />
+              </div>
+
+              {selectedSubdealer && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-medium">Selected:</span>{" "}
+                    {selectedSubdealer.accountname}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShareDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleTransferQRs}
+                disabled={
+                  !selectedSubdealer ||
+                  transferLoading ||
+                  selectedQRs.length === 0
+                }
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+              >
+                {transferLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                    Transferring...
+                  </div>
+                ) : (
+                  `Share ${selectedQRs.length} Coupon${
+                    selectedQRs.length > 1 ? "s" : ""
+                  }`
+                )}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
