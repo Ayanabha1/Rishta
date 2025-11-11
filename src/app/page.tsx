@@ -132,13 +132,13 @@ export default function Page() {
           </p>
         </div>
 
-        <section className="overflow-hidden flex flex-col h-[85%]">
+        <section className="flex flex-col">
           {pendingForApproval ? (
-            <div className="space-y-4 h-full flex flex-col">
+            <div className="space-y-4">
               <PendingApproval />
             </div>
           ) : (
-            <div className="space-y-4 h-full flex flex-col">
+            <div className="space-y-4">
               <StatsCard
                 title={
                   userData?.accounttype === "Dealers" ||
@@ -164,19 +164,19 @@ export default function Page() {
                 }
               />
               {/* Helpline Section */}
-              <div className="relative glassmorphic-card shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500">
+              <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500">
                 <div className="space-y-3">
                   <a
                     href="tel:7604027770"
-                    className="flex items-center gap-2 text-purple-950 hover:text-purple-700 transition-colors"
+                    className="flex items-center gap-3 text-purple-950 hover:text-purple-700 transition-colors"
                   >
-                    <Phone className="h-5 w-5" />
+                    <Phone className="h-5 w-5 text-purple-950" />
                     <div>
                       <p className="text-sm font-medium text-purple-700">HELPLINE NO</p>
                       <p className="text-lg font-semibold text-purple-950">7604027770</p>
                     </div>
                   </a>
-                  <div className="pt-2 border-t border-purple-200/50">
+                  <div className="pt-3 border-t border-purple-200/50">
                     <p className="text-sm font-medium text-purple-700">OFFICE HOURS</p>
                     <p className="text-base font-semibold text-purple-950">
                       11AM TO 6.30PM (MON TO SAT)
