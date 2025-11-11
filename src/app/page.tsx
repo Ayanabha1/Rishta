@@ -132,13 +132,13 @@ export default function Page() {
           </p>
         </div>
 
-        <section className="flex flex-col">
+        <section className="flex flex-col h-[85%] min-h-0">
           {pendingForApproval ? (
-            <div className="space-y-4">
+            <div className="space-y-4 h-full flex flex-col">
               <PendingApproval />
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 h-full flex flex-col">
               <StatsCard
                 title={
                   userData?.accounttype === "Dealers" ||
@@ -156,15 +156,17 @@ export default function Page() {
                   )
                 }
               />
-              <RecentTransactions
-                transactions={
-                  userData?.latest10paymenthistory ||
-                  userData?.latest10pointhistory ||
-                  []
-                }
-              />
+              <div className="flex-1 min-h-0">
+                <RecentTransactions
+                  transactions={
+                    userData?.latest10paymenthistory ||
+                    userData?.latest10pointhistory ||
+                    []
+                  }
+                />
+              </div>
               {/* Helpline Section */}
-              <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500">
+              <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500 flex-shrink-0">
                 <div className="space-y-3">
                   <a
                     href="tel:7604027770"

@@ -14,8 +14,8 @@ interface RecentTransactionsProps {
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   console.log(transactions);
   return (
-    <div className="relative glassmorphic-card shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 h-[78%] overflow-hidden">
-      <div className="flex items-center justify-between mb-4 ">
+    <div className="relative glassmorphic-card shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 h-full overflow-hidden flex flex-col">
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <h3 className="text-lg font-semibold text-purple-950">
           Recent Transactions
         </h3>
@@ -23,7 +23,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
           <ArrowUpRight className="h-5 w-5 text-purple-900" />
         </button>
       </div>
-      <ul className="space-y-2 overflow-y-scroll h-[90%]">
+      <ul className="space-y-2 overflow-y-scroll flex-1 min-h-0">
         {transactions?.length > 0 ? (
           transactions?.map((transaction, i) => (
             <li key={i} className="flex items-start justify-between text-sm">
