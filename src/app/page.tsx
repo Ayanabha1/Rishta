@@ -163,33 +163,30 @@ export default function Page() {
                   []
                 }
               />
+              {/* Helpline Section */}
+              <div className="relative glassmorphic-card shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500">
+                <div className="space-y-3">
+                  <a
+                    href="tel:7604027770"
+                    className="flex items-center gap-2 text-purple-950 hover:text-purple-700 transition-colors"
+                  >
+                    <Phone className="h-5 w-5" />
+                    <div>
+                      <p className="text-sm font-medium text-purple-700">HELPLINE NO</p>
+                      <p className="text-lg font-semibold text-purple-950">7604027770</p>
+                    </div>
+                  </a>
+                  <div className="pt-2 border-t border-purple-200/50">
+                    <p className="text-sm font-medium text-purple-700">OFFICE HOURS</p>
+                    <p className="text-base font-semibold text-purple-950">
+                      11AM TO 6.30PM (MON TO SAT)
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </section>
-
-        {/* Helpline Section */}
-        <div className="mt-auto pt-4 pb-4">
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-green-500 border-2">
-            <div className="space-y-3">
-              <a
-                href="tel:7604027770"
-                className="flex items-center gap-2 text-purple-950 hover:text-purple-700 transition-colors"
-              >
-                <Phone className="h-5 w-5" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600">HELPLINE NO</p>
-                  <p className="text-lg font-semibold">7604027770</p>
-                </div>
-              </a>
-              <div className="pt-2 border-t border-gray-200">
-                <p className="text-sm font-medium text-gray-600">OFFICE HOURS</p>
-                <p className="text-base font-semibold text-purple-950">
-                  11AM TO 6.30PM (MON TO SAT)
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
