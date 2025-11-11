@@ -11,7 +11,7 @@ import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { IndianRupee, StarIcon, Users, QrCode } from "lucide-react";
+import { IndianRupee, StarIcon, Users, QrCode, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
@@ -166,6 +166,30 @@ export default function Page() {
             </div>
           )}
         </section>
+
+        {/* Helpline Section */}
+        <div className="mt-auto pt-4 pb-4">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-green-500 border-2">
+            <div className="space-y-3">
+              <a
+                href="tel:7604027770"
+                className="flex items-center gap-2 text-purple-950 hover:text-purple-700 transition-colors"
+              >
+                <Phone className="h-5 w-5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600">HELPLINE NO</p>
+                  <p className="text-lg font-semibold">7604027770</p>
+                </div>
+              </a>
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-sm font-medium text-gray-600">OFFICE HOURS</p>
+                <p className="text-base font-semibold text-purple-950">
+                  11AM TO 6.30PM (MON TO SAT)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
