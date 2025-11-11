@@ -11,7 +11,7 @@ import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { IndianRupee, StarIcon, Users, QrCode } from "lucide-react";
+import { IndianRupee, StarIcon, Users, QrCode, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
@@ -132,7 +132,7 @@ export default function Page() {
           </p>
         </div>
 
-        <section className="overflow-hidden flex flex-col h-[85%]">
+        <section className="flex flex-col h-[85%] min-h-0">
           {pendingForApproval ? (
             <div className="space-y-4 h-full flex flex-col">
               <PendingApproval />
@@ -156,13 +156,36 @@ export default function Page() {
                   )
                 }
               />
-              <RecentTransactions
-                transactions={
-                  userData?.latest10paymenthistory ||
-                  userData?.latest10pointhistory ||
-                  []
-                }
-              />
+              <div className="flex-1 min-h-0">
+                <RecentTransactions
+                  transactions={
+                    userData?.latest10paymenthistory ||
+                    userData?.latest10pointhistory ||
+                    []
+                  }
+                />
+              </div>
+              {/* Helpline Section */}
+              <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500 flex-shrink-0">
+                <div className="space-y-3">
+                  <a
+                    href="tel:7604027770"
+                    className="flex items-center gap-3 text-purple-950 hover:text-purple-700 transition-colors"
+                  >
+                    <Phone className="h-5 w-5 text-purple-950" />
+                    <div>
+                      <p className="text-sm font-medium text-purple-700">HELPLINE NO</p>
+                      <p className="text-lg font-semibold text-purple-950">7604027770</p>
+                    </div>
+                  </a>
+                  <div className="pt-3 border-t border-purple-200/50">
+                    <p className="text-sm font-medium text-purple-700">OFFICE HOURS</p>
+                    <p className="text-base font-semibold text-purple-950">
+                      11AM TO 6.30PM (MON TO SAT)
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </section>
