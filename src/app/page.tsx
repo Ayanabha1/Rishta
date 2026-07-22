@@ -11,7 +11,15 @@ import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { IndianRupee, StarIcon, Users, QrCode, Phone } from "lucide-react";
+import {
+  IndianRupee,
+  StarIcon,
+  Users,
+  QrCode,
+  Phone,
+  FilePlus,
+  FileText,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
@@ -20,13 +28,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { database } from "@/lib/firebase";
 import { ref, set } from "firebase/database";
+import IEstimate from "@/interfaces/IEstimate";
 
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
   const [pendingForApproval, setPendingForApproval] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [estimates, setEstimates] = useState<IEstimate[]>([]);
+  const [estimatesLoading, setEstimatesLoading] = useState(false);
   const router = useRouter();
   const user = useUserStore();
+  const isEngineer = userData?.module === "Engineers";
 
   const getUserDetails = async () => {
     try {
@@ -34,13 +46,26 @@ export default function Page() {
       const data = await API.get("/getAccount");
       setUserData(data.data.data.data);
       useUserStore.setState(data.data.data.data);
+      const status = data.data.data.data.status;
       setPendingForApproval(
-        data.data.data.data.status === "Pending for Approval"
+        status === "Pending for Approval" || !status
       );
       setLoading(false);
     } catch (error) {
       setLoading(false);
       errorHandler(error);
+    }
+  };
+
+  const getEstimates = async () => {
+    try {
+      setEstimatesLoading(true);
+      const data = await API.get("/getSiteEstimate");
+      setEstimates(data.data.data.records || data.data.data || []);
+    } catch (error) {
+      errorHandler(error);
+    } finally {
+      setEstimatesLoading(false);
     }
   };
 
@@ -66,7 +91,8 @@ export default function Page() {
       await set(qrRef, {
         scanned: true,
         timestamp: Date.now(),
-        scannedBy: userData?.firstname || userData?.owner_name,
+        scannedBy:
+          userData?.firstname || userData?.owner_name || userData?.first_name,
         mobileNumber: userData?.mobile,
         qrCode: qrNumber,
       }).then(() => {
@@ -99,6 +125,12 @@ export default function Page() {
     }
   }, []);
 
+  useEffect(() => {
+    if (isEngineer && !pendingForApproval) {
+      getEstimates();
+    }
+  }, [isEngineer, pendingForApproval]);
+
   if (loading) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center">
@@ -128,7 +160,7 @@ export default function Page() {
         <div className="-space-y-1">
           <h1 className="text-2xl font-semibold text-purple-950">Welcome</h1>
           <p className="text-4xl font-bold text-purple-950">
-            {userData?.firstname || userData?.owner_name}
+            {userData?.firstname || userData?.owner_name || userData?.first_name}
           </p>
         </div>
 
@@ -139,32 +171,91 @@ export default function Page() {
             </div>
           ) : (
             <div className="space-y-4 h-full flex flex-col">
-              <StatsCard
-                title={
-                  userData?.accounttype === "Dealers" ||
-                  userData?.accounttype === "Business Partner"
-                    ? "Reward Points"
-                    : "Your Yearly Earnings"
-                }
-                value={userData?.["12monthearing"] || "0"}
-                icon={
-                  userData?.accounttype === "Dealers" ||
-                  userData?.accounttype === "Business Partner" ? (
-                    <StarIcon className="h-6 w-6 text-purple-950" />
-                  ) : (
-                    <IndianRupee className="h-6 w-6 text-purple-950" />
-                  )
-                }
-              />
-              <div className="flex-1 min-h-0">
-                <RecentTransactions
-                  transactions={
-                    userData?.latest10paymenthistory ||
-                    userData?.latest10pointhistory ||
-                    []
-                  }
-                />
-              </div>
+              {isEngineer ? (
+                <>
+                  <Link
+                    href="/create-estimate"
+                    className="w-full py-3 px-4 flex items-center justify-center gap-2 text-white rounded-lg font-semibold bg-purple-600 hover:bg-purple-700 shadow-lg transition-colors flex-shrink-0"
+                  >
+                    <FilePlus className="h-5 w-5" />
+                    Create Estimate
+                  </Link>
+                  <div className="flex-1 min-h-0 glassmorphic-card rounded-2xl bg-white/10 backdrop-blur-md shadow-md p-4 overflow-y-auto">
+                    <h2 className="text-lg font-semibold text-purple-950 mb-3">
+                      Your Estimates
+                    </h2>
+                    {estimatesLoading ? (
+                      <div className="flex justify-center items-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+                      </div>
+                    ) : estimates.length === 0 ? (
+                      <p className="text-purple-800/70 text-center py-8">
+                        No estimates found
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {estimates.map((estimate, index) => (
+                          <div
+                            key={index}
+                            className="p-3 rounded-lg bg-white/40 flex items-start gap-3"
+                          >
+                            <FileText className="h-5 w-5 text-purple-700 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-purple-950">
+                                {estimate.customer_name}
+                              </p>
+                              <p className="text-sm text-purple-800/70">
+                                {estimate.mobile_number} &middot;{" "}
+                                {estimate.project_type}
+                              </p>
+                            </div>
+                            {estimate.status && (
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs flex-shrink-0 ${
+                                  estimate.status === "Approved"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {estimate.status}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <StatsCard
+                    title={
+                      userData?.accounttype === "Dealers" ||
+                      userData?.accounttype === "Business Partner"
+                        ? "Reward Points"
+                        : "Your Yearly Earnings"
+                    }
+                    value={userData?.["12monthearing"] || "0"}
+                    icon={
+                      userData?.accounttype === "Dealers" ||
+                      userData?.accounttype === "Business Partner" ? (
+                        <StarIcon className="h-6 w-6 text-purple-950" />
+                      ) : (
+                        <IndianRupee className="h-6 w-6 text-purple-950" />
+                      )
+                    }
+                  />
+                  <div className="flex-1 min-h-0">
+                    <RecentTransactions
+                      transactions={
+                        userData?.latest10paymenthistory ||
+                        userData?.latest10pointhistory ||
+                        []
+                      }
+                    />
+                  </div>
+                </>
+              )}
               {/* Helpline Section */}
               <div className="relative glassmorphic-card overflow-hidden shadow-md rounded-2xl bg-white/10 backdrop-blur-md p-4 border-2 border-green-500 flex-shrink-0">
                 <div className="space-y-3">
