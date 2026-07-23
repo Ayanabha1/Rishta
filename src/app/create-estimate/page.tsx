@@ -64,7 +64,7 @@ export default function CreateEstimate() {
         if (key === "product_interest") return;
         if (value) formData.append(key, value);
       });
-      formData.append("product_interest", productInterest.join(","));
+      formData.append("product_interest", productInterest.join(" |##| "));
 
       await API.post("/createSiteEstimate", formData);
       showSuccessToast("Estimate created successfully");

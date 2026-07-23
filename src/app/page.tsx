@@ -60,8 +60,8 @@ export default function Page() {
   const getEstimates = async () => {
     try {
       setEstimatesLoading(true);
-      const data = await API.get("/getSiteEstimate");
-      setEstimates(data.data.data.records || data.data.data || []);
+      const data = await API.get("/getSiteEstimates");
+      setEstimates(data.data.data.data || []);
     } catch (error) {
       errorHandler(error);
     } finally {
@@ -194,10 +194,11 @@ export default function Page() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {estimates.map((estimate, index) => (
-                          <div
-                            key={index}
-                            className="p-3 rounded-lg bg-white/40 flex items-start gap-3"
+                        {estimates.map((estimate) => (
+                          <Link
+                            key={estimate.siteestimateid}
+                            href={`/estimate/${estimate.siteestimateid}`}
+                            className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors flex items-start gap-3"
                           >
                             <FileText className="h-5 w-5 text-purple-700 mt-0.5 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
@@ -205,22 +206,22 @@ export default function Page() {
                                 {estimate.customer_name}
                               </p>
                               <p className="text-sm text-purple-800/70">
-                                {estimate.mobile_number} &middot;{" "}
-                                {estimate.project_type}
+                                {estimate.siteestimate_no} &middot;{" "}
+                                {estimate.pincode}
                               </p>
                             </div>
-                            {estimate.status && (
+                            {estimate.lead_status && (
                               <span
                                 className={`px-2 py-0.5 rounded-full text-xs flex-shrink-0 ${
-                                  estimate.status === "Approved"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
+                                  estimate.lead_status === "New"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-green-100 text-green-800"
                                 }`}
                               >
-                                {estimate.status}
+                                {estimate.lead_status}
                               </span>
                             )}
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     )}
