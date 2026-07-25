@@ -7,6 +7,11 @@ interface IEstimate {
   salesperson_name: string;
 }
 
+interface IFileInfo {
+  id: string;
+  title: string;
+}
+
 interface IEstimateDetail {
   siteestimateid: number;
   siteestimate_no: string;
@@ -42,7 +47,8 @@ interface IEstimateDetail {
   original_engineer_name: string | null;
   original_estimate_snapshot: string | null;
   salesperson_name: string;
+  list_of_files?: IFileInfo[];
 }
 
 export default IEstimate;
-export type { IEstimateDetail };
+export type { IEstimateDetail, IFileInfo };

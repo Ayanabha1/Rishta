@@ -32,6 +32,8 @@ interface IUser {
   relation_with_nominee: string;
   nominee_contact_no: string;
   anniversary_date: string;
+  total_points: string;
+  minimum_redeem_point: string;
 }
 
 interface PaymentHistory {

@@ -8,6 +8,7 @@ import {
   List,
   HardHat,
   Users,
+  StarIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -28,11 +29,13 @@ export function Header({
   pendingForApproval,
   QRVisible,
   MenuVisible,
+  points,
   processQRScan,
 }: {
   pendingForApproval: boolean;
   QRVisible: boolean;
   MenuVisible: boolean;
+  points?: string;
   processQRScan: (
     data: IDetectedBarcode[],
     closeScanner: () => void
@@ -45,8 +48,8 @@ export function Header({
   };
 
   return (
-    <header className="flex items-center justify-between py-4">
-      <div className="relative">
+    <header className="flex items-center justify-between py-4 gap-3">
+      <div className="relative flex-shrink-0">
         <Image
           src="/assets/logo.png"
           alt="Company Logo"
@@ -57,7 +60,14 @@ export function Header({
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2">
+        {points !== undefined && (
+          <div className="flex items-center gap-1 rounded-full border border-purple-900/20 bg-purple-900/10 px-3 py-1.5 text-sm font-semibold text-purple-900">
+            <StarIcon className="h-4 w-4 fill-current" />
+            <span>{points}</span>
+          </div>
+        )}
+
         <Link
           href="/profile"
           className="rounded-full p-2 hover:bg-white/20 transition-colors "

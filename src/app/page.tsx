@@ -48,7 +48,7 @@ export default function Page() {
       useUserStore.setState(data.data.data.data);
       const status = data.data.data.data.status;
       setPendingForApproval(
-        status === "Pending for Approval" || !status
+        status === "Pending for Approval" || status === "Inactive" || !status
       );
       setLoading(false);
     } catch (error) {
@@ -148,7 +148,8 @@ export default function Page() {
     <section className="px-4 w-full h-full flex flex-col">
       <Header
         pendingForApproval={pendingForApproval}
-        QRVisible={true}
+        QRVisible={!isEngineer}
+        points={isEngineer ? userData?.total_points || "0" : undefined}
         MenuVisible={
           userData?.accounttype === "Dealers" ||
           userData?.accounttype === "Business Partner"
@@ -182,7 +183,7 @@ export default function Page() {
                   </Link>
                   <div className="flex-1 min-h-0 glassmorphic-card rounded-2xl bg-white/10 backdrop-blur-md shadow-md p-4 overflow-y-auto">
                     <h2 className="text-lg font-semibold text-purple-950 mb-3">
-                      Your Estimates
+                      Your Leads
                     </h2>
                     {estimatesLoading ? (
                       <div className="flex justify-center items-center py-8">

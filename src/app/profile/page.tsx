@@ -33,7 +33,9 @@ export default function ProfilePage() {
       console.log(data.data.data);
       setUserData(data.data.data.data);
       const status = data.data.data.data.status;
-      setProfilePending(status === "Pending for Approval" || !status);
+      setProfilePending(
+        status === "Pending for Approval" || status === "Inactive" || !status
+      );
       setLoading(false);
     } catch (error) {
       setLoading(false);

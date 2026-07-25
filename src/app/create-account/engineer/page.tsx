@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { API } from "@/lib/axios";
-import { cn, showSuccessToast } from "@/lib/utils";
+import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import errorHandler from "@/lib/error-handler";
 
@@ -15,7 +15,6 @@ export default function CreateEngineerAccount() {
     first_name: "",
     last_name: "",
     email_address: "",
-    phone_number: "",
     address_line_1: "",
     city: "",
     district: "",
@@ -32,12 +31,21 @@ export default function CreateEngineerAccount() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const mobile_number = localStorage.getItem("mobile_number");
+    if (!mobile_number) {
+      showErrorToast("Mobile number not found");
+      router.push("/sign-in");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("registered");
+      return;
+    }
     setLoading(true);
     try {
       const formData = new FormData();
       Object.entries(accountInfo).forEach(([key, value]) => {
         if (value) formData.append(key, value);
       });
+      formData.append("phone_number", mobile_number);
 
       await API.post("/createEngineer", formData);
       showSuccessToast("Account created successfully");
@@ -157,34 +165,6 @@ export default function CreateEngineerAccount() {
                 placeholder="engineer@example.com"
                 value={accountInfo.email_address}
                 onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="phone_number"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone_number"
-                name="phone_number"
-                required
-                minLength={10}
-                maxLength={10}
-                pattern="[0-9]{10}"
-                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="9830012466"
-                value={accountInfo.phone_number}
-                onChange={handleChange}
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(
-                    /[^0-9]/g,
-                    ""
-                  );
-                }}
               />
             </div>
 

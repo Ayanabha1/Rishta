@@ -28,7 +28,25 @@ export default function CreateEstimate() {
   });
   const [productInterest, setProductInterest] = useState<string[]>([]);
   const router = useRouter();
+  const [files, setFiles] = useState<Array<{ name: string; data: string }>>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
 
+  const PROJECT_TYPE_OPTIONS = [
+    "Residential",
+    "Commercial",
+    "Apartment",
+    "Factory",
+    "Other",
+  ];
+  const CONSTRUCTION_STAGE_OPTIONS = [
+    "Planning",
+    "Foundation",
+    "Pillar",
+    "Roof Casting",
+    "Finishing",
+  ];
+  
   const PRODUCT_INTEREST_OPTIONS = [
     "TMT Bar",
     "Structural Steel",
@@ -53,26 +71,123 @@ export default function CreateEstimate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Client-side validations to mirror API expectations
+    if (!PROJECT_TYPE_OPTIONS.includes(estimateInfo.project_type)) {
+      showErrorToast(
+        `Project Type must be one of: ${PROJECT_TYPE_OPTIONS.join(
+          ", "
+        )}.`
+      );
+      return;
+    }
+
+    if (!CONSTRUCTION_STAGE_OPTIONS.includes(estimateInfo.construction_stage)) {
+      showErrorToast(
+        `Construction Stage must be one of: ${CONSTRUCTION_STAGE_OPTIONS.join(
+          ", "
+        )}.`
+      );
+      return;
+    }
+
     if (productInterest.length === 0) {
       showErrorToast("Select at least one product interest.");
       return;
     }
+
+    // Ensure productInterest values are valid
+    const invalidProduct = productInterest.find(
+      (p) => !PRODUCT_INTEREST_OPTIONS.includes(p)
+    );
+    if (invalidProduct) {
+      showErrorToast(
+        `Product Interest must only contain: ${PRODUCT_INTEREST_OPTIONS.join(
+          ", "
+        )}.`
+      );
+      return;
+    }
+
+    if (!estimateInfo.competitor_brand) {
+      showErrorToast("Competitor Brand should not be empty.");
+      return;
+    }
     setLoading(true);
+    if (files.length > 0) {
+      setUploadMessage("Creating estimate...");
+    }
     try {
       const formData = new FormData();
       Object.entries(estimateInfo).forEach(([key, value]) => {
         if (key === "product_interest") return;
         if (value) formData.append(key, value);
       });
-      formData.append("product_interest", productInterest.join(" |##| "));
+      formData.append("product_interest", productInterest.join(", "));
 
-      await API.post("/createSiteEstimate", formData);
+      const createResp = await API.post("/createSiteEstimate", formData);
+      // Extract ID from API response: { success: true, data: { message: "...", id: 51034 } }
+      const createdId = createResp?.data?.data?.id;
+
       showSuccessToast("Estimate created successfully");
+
+      // If there are files attached, upload them now using the created estimate ID
+      if (files.length > 0 && createdId) {
+        setUploadingFiles(true);
+        setUploadMessage("Uploading files...");
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          const fd = new FormData();
+          fd.append("image", f.data);
+          fd.append("filename", f.name);
+          fd.append("siteestimateid", String(createdId));
+          try {
+            setUploadMessage(`Uploading ${f.name} (${i + 1}/${files.length})`);
+            await API.post("/uploadFile", fd);
+          } catch (err) {
+            console.error("File upload failed", err);
+            // Continue uploading remaining files even if one fails
+          }
+        }
+        setUploadingFiles(false);
+        setUploadMessage("");
+        showSuccessToast("Files uploaded successfully");
+      }
+
       router.push("/");
     } catch (error: any) {
       errorHandler(error);
     }
     setLoading(false);
+  };
+
+  const fileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = (err) => reject(err);
+    });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const chosen = e.target.files;
+    if (!chosen) return;
+    const arr = Array.from(chosen);
+    const converted: Array<{ name: string; data: string }> = [];
+    for (const f of arr) {
+      try {
+        const b = await fileToBase64(f);
+        converted.push({ name: f.name, data: b });
+      } catch (err) {
+        console.error("failed to convert file", err);
+      }
+    }
+    setFiles((prev) => [...prev, ...converted]);
+    // reset input
+    e.currentTarget.value = "";
+  };
+
+  const removeFile = (name: string) => {
+    setFiles((prev) => prev.filter((f) => f.name !== name));
   };
 
   const handleChange = (
@@ -289,16 +404,23 @@ export default function CreateEstimate() {
               >
                 Project Type
               </label>
-              <input
-                type="text"
+              <select
                 id="project_type"
                 name="project_type"
                 required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="Residential"
                 value={estimateInfo.project_type}
                 onChange={handleChange}
-              />
+              >
+                <option value="" disabled>
+                  Select project type
+                </option>
+                {PROJECT_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -308,16 +430,23 @@ export default function CreateEstimate() {
               >
                 Construction Stage
               </label>
-              <input
-                type="text"
+              <select
                 id="construction_stage"
                 name="construction_stage"
                 required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
-                placeholder="Foundation"
                 value={estimateInfo.construction_stage}
                 onChange={handleChange}
-              />
+              >
+                <option value="" disabled>
+                  Select construction stage
+                </option>
+                {CONSTRUCTION_STAGE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -399,6 +528,7 @@ export default function CreateEstimate() {
                 type="text"
                 id="competitor_brand"
                 name="competitor_brand"
+                required
                 className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
                 placeholder="TATA Steel"
                 value={estimateInfo.competitor_brand}
@@ -408,6 +538,53 @@ export default function CreateEstimate() {
           </div>
 
           {/* Submit Button */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-black mb-1">Attach Files</label>
+            <div className="flex items-center gap-3">
+              <input
+                id="create-files-input"
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/*,application/pdf"
+              />
+              <label
+                htmlFor="create-files-input"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg shadow-md cursor-pointer"
+              >
+                Choose files
+              </label>
+              <span className="text-sm text-black/70">
+                {files.length === 0 ? "No files chosen" : `${files.length} file(s) selected`}
+              </span>
+            </div>
+
+            {files.length > 0 && (
+              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+                {files.map((f) => (
+                  <div key={f.name} className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-white/40">
+                    <img
+                      src={f.data}
+                      alt={f.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(f.name)}
+                      className="absolute top-1 right-1 bg-black/60 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {(uploadingFiles || uploadMessage) && (
+              <div className="mt-2 px-3 py-2 bg-white/30 rounded-lg text-sm text-black/80">{uploadMessage}</div>
+            )}
+          </div>
           <button
             type="submit"
             className={cn(
@@ -418,7 +595,13 @@ export default function CreateEstimate() {
             )}
             disabled={loading}
           >
-            Create Estimate
+            {loading
+              ? files.length > 0
+                ? uploadingFiles
+                  ? `Uploading files...`
+                  : "Creating estimate..."
+                : "Creating estimate..."
+              : "Create Estimate"}
           </button>
         </form>
       </div>
