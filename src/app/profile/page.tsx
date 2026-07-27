@@ -32,7 +32,10 @@ export default function ProfilePage() {
       const data = await API.get("/getAccount");
       console.log(data.data.data);
       setUserData(data.data.data.data);
-      setProfilePending(data.data.data.data.status === "Pending for Approval");
+      const status = data.data.data.data.status;
+      setProfilePending(
+        status === "Pending for Approval" || status === "Inactive" || !status
+      );
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -94,6 +97,8 @@ export default function ProfilePage() {
                       ?.split(" ")
                       .map((name) => name[0])
                       .join("")
+                  : userData?.module === "Engineers"
+                  ? `${userData?.first_name?.[0]}${userData?.last_name?.[0]}`
                   : `${userData?.firstname?.[0]}${userData?.lastname?.[0]}`}
               </div>
               {profilePending ? (
@@ -116,6 +121,8 @@ export default function ProfilePage() {
                 {userData?.accounttype === "Dealers" ||
                 userData?.accounttype === "Business Partner"
                   ? userData?.owner_name
+                  : userData?.module === "Engineers"
+                  ? `${userData?.first_name} ${userData?.last_name}`
                   : `${userData?.firstname} ${userData?.lastname}`}
               </h1>
             )}
@@ -129,7 +136,7 @@ export default function ProfilePage() {
                       profilePending ? "bg-yellow-500" : "bg-green-500"
                     } text-black`}
                   >
-                    {userData?.status}
+                    {userData?.status || "Pending for Approval"}
                   </span>
                 </>
               )}
@@ -170,7 +177,11 @@ export default function ProfilePage() {
                 {loading ? (
                   <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
                 ) : (
-                  <span className="/80">{userData?.email}</span>
+                  <span className="/80">
+                    {userData?.module === "Engineers"
+                      ? userData?.email_address
+                      : userData?.email}
+                  </span>
                 )}
               </div>
             )}
@@ -179,7 +190,11 @@ export default function ProfilePage() {
               {loading ? (
                 <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
               ) : (
-                <span className="/80">{userData?.mobile}</span>
+                <span className="/80">
+                  {userData?.module === "Engineers"
+                    ? userData?.phone_number
+                    : userData?.mobile}
+                </span>
               )}
             </div>
             <div className="flex items-center gap-3">
@@ -187,7 +202,11 @@ export default function ProfilePage() {
               {loading ? (
                 <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
               ) : (
-                <span className="/80">{userData?.address}</span>
+                <span className="/80">
+                  {userData?.module === "Engineers"
+                    ? `${userData?.address_line_1}, ${userData?.city}, ${userData?.state} ${userData?.zip_code}`
+                    : userData?.address}
+                </span>
               )}
             </div>
           </div>
@@ -237,7 +256,8 @@ export default function ProfilePage() {
 
         {/* Only show Bank Details for Mason */}
         {userData?.accounttype !== "Dealers" &&
-          userData?.accounttype !== "Business Partner" && (
+          userData?.accounttype !== "Business Partner" &&
+          userData?.module !== "Engineers" && (
             <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
               <h2 className="text-lg font-semibold">Bank Details</h2>
               <div className="space-y-3">

@@ -17,6 +17,23 @@ interface IUser {
   accounttype: string;
   accountname: string;
   owner_name: string;
+  first_name: string;
+  last_name: string;
+  email_address: string;
+  phone_number: string;
+  address_line_1: string;
+  city: string;
+  district: string;
+  state: string;
+  country: string;
+  zip_code: string;
+  date_of_birth: string;
+  nominee_name: string;
+  relation_with_nominee: string;
+  nominee_contact_no: string;
+  anniversary_date: string;
+  total_points: string;
+  minimum_redeem_point: string;
 }
 
 interface PaymentHistory {
