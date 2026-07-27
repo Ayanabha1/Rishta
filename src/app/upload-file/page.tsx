@@ -13,12 +13,17 @@ import {
 import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
+import { useUserStore } from "@/hooks/use-user";
 
 export type DocumentType =
   | "Bank Statement"
   | "Cancel Cheque"
   | "Bank Pass Book"
-  | "Profile Picture";
+  | "Profile Picture"
+  | "Cancel Cheque / Passbook"
+  | "PAN Card"
+  | "Aadhar Card Front Side"
+  | "Aadhar Card Back Side";
 
 export interface FileUpload {
   file: File;
@@ -30,12 +35,22 @@ export default function UploadPage() {
   const [uploads, setUploads] = useState<FileUpload[]>([]);
   const [currentType, setCurrentType] =
     useState<DocumentType>("Bank Statement");
-  const documentTypes: { value: DocumentType; label: string }[] = [
-    { value: "Bank Statement", label: "Bank Statement" },
-    { value: "Cancel Cheque", label: "Cancel Cheque" },
-    { value: "Bank Pass Book", label: "Bank Pass Book" },
-    { value: "Profile Picture", label: "Profile Picture" },
-  ];
+  const isEngineer = useUserStore((state) => state.module) === "Engineers";
+  const documentTypes: { value: DocumentType; label: string }[] = isEngineer
+    ? [
+        { value: "Bank Statement", label: "Bank Statement" },
+        { value: "Cancel Cheque / Passbook", label: "Cancel Cheque / Passbook" },
+        { value: "PAN Card", label: "PAN Card" },
+        { value: "Profile Picture", label: "Profile Picture" },
+        { value: "Aadhar Card Front Side", label: "Aadhar Card Front Side" },
+        { value: "Aadhar Card Back Side", label: "Aadhar Card Back Side" },
+      ]
+    : [
+        { value: "Bank Statement", label: "Bank Statement" },
+        { value: "Cancel Cheque", label: "Cancel Cheque" },
+        { value: "Bank Pass Book", label: "Bank Pass Book" },
+        { value: "Profile Picture", label: "Profile Picture" },
+      ];
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
