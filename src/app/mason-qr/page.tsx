@@ -28,7 +28,7 @@ export default function MasonQRPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [brand, setBrand] = useState("all");
+  const [brand, setBrand] = useState("");
   const [brands, setBrands] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
@@ -151,14 +151,18 @@ export default function MasonQRPage() {
       setLoading(true);
       const response = await API.get<IMasonQRResponse>(
         `/dealer/masonQRs?status=&page=${page}&limit=${limit}${
-          brand === "all" ? "" : `&brand=${brand}`
+          !brand ? "" : `&brand=${brand}`
         }`
       );
       setQrs(response.data.data.records);
       setTotal(response.data.data.total);
       // Set brands from the first response if not already set
       if (brands.length === 0) {
-        setBrands(response.data.data.brands);
+        const apiBrands = response.data.data.brands;
+        const hasCement = apiBrands.some(
+          (b) => b.toLowerCase() === "cement"
+        );
+        setBrands(hasCement ? apiBrands : ["Cement", ...apiBrands]);
       }
     } catch (error) {
       errorHandler(error);
@@ -264,6 +268,14 @@ export default function MasonQRPage() {
     fetchQRs();
   }, [page, limit, brand]);
 
+  // Default brand to Cement once brand list loads
+  useEffect(() => {
+    if (brands.length > 0 && !brand) {
+      const cement = brands.find((b) => b.toLowerCase() === "cement");
+      setBrand(cement || brands[0]);
+    }
+  }, [brands]);
+
   // Clean up listener when component unmounts
   useEffect(() => {
     return () => {
@@ -323,7 +335,6 @@ export default function MasonQRPage() {
                     <SelectValue placeholder="Filter by brand" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Brands</SelectItem>
                     {brands.map((brand) => (
                       <SelectItem key={brand} value={brand}>
                         {brand}
