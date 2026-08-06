@@ -46,6 +46,7 @@ export default function CreateSalespersonAccount() {
         "salesperson_name",
         `${accountInfo.first_name} ${accountInfo.last_name}`.trim()
       );
+      formData.append("assigned_user_id", "8");
       formData.append("phone_number", mobile_number);
 
       await API.post("/createSalespersons", formData);
