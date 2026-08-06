@@ -1,0 +1,358 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { API } from "@/lib/axios";
+import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import errorHandler from "@/lib/error-handler";
+
+export default function CreateSalespersonAccount() {
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [accountInfo, setAccountInfo] = useState({
+    first_name: "",
+    last_name: "",
+    employee_code: "",
+    email_address: "",
+    designation: "",
+    address_line_1: "",
+    city: "",
+    district: "",
+    state: "",
+    country: "India",
+    pincode: "",
+  });
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const mobile_number = localStorage.getItem("mobile_number");
+    if (!mobile_number) {
+      showErrorToast("Mobile number not found");
+      router.push("/sign-in");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("registered");
+      return;
+    }
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      Object.entries(accountInfo).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+      formData.append(
+        "salesperson_name",
+        `${accountInfo.first_name} ${accountInfo.last_name}`.trim()
+      );
+      formData.append("phone_number", mobile_number);
+
+      await API.post("/createSalespersons", formData);
+      showSuccessToast("Account created successfully");
+      localStorage.setItem("registered", "true");
+      router.push("/");
+    } catch (error: any) {
+      errorHandler(error);
+    }
+    setLoading(false);
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setAccountInfo((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return (
+    <div className="h-full w-full glassmorphic-card shadow-2xl overflow-y-hidden">
+      <div className="relative h-full mx-auto pb-10 p-4">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8 my-4 sticky top-0 z-10">
+          <Link
+            href="/"
+            className="rounded-full p-2 hover:bg-black/5 transition-colors bg-white/40 backdrop-blur-md"
+          >
+            <ArrowLeft className="h-5 w-5 text-black" />
+          </Link>
+          <div className="px-4 py-2 rounded-full bg-white/50 backdrop-blur-md">
+            <span className="text-black font-medium">Create Account</span>
+          </div>
+        </div>
+
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 overflow-y-scroll h-[99%] w-full pb-24"
+        >
+          {/* Personal Information */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-black">
+              Personal Information
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="first_name"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="Amit"
+                  value={accountInfo.first_name}
+                  onChange={handleChange}
+                  onInput={(e) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^\p{L}\s]/gu,
+                      ""
+                    );
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="last_name"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="Das"
+                  value={accountInfo.last_name}
+                  onChange={handleChange}
+                  onInput={(e) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^\p{L}\s]/gu,
+                      ""
+                    );
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="email_address"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email_address"
+                name="email_address"
+                required
+                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                placeholder="amitdas@example.com"
+                value={accountInfo.email_address}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="employee_code"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Employee Code
+                </label>
+                <input
+                  type="text"
+                  id="employee_code"
+                  name="employee_code"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="EMP-1042"
+                  value={accountInfo.employee_code}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="designation"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Designation
+                </label>
+                <input
+                  type="text"
+                  id="designation"
+                  name="designation"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="Area Sales Executive"
+                  value={accountInfo.designation}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Address */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-black">Address</h2>
+
+            <div>
+              <label
+                htmlFor="address_line_1"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address_line_1"
+                name="address_line_1"
+                required
+                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                placeholder="12 MG Road, Near Bus Stand"
+                value={accountInfo.address_line_1}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="city"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  City
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="Bangalore"
+                  value={accountInfo.city}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="district"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  District
+                </label>
+                <input
+                  type="text"
+                  id="district"
+                  name="district"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="Bangalore"
+                  value={accountInfo.district}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="state"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  State
+                </label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  required
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="Karnataka"
+                  value={accountInfo.state}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="pincode"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Pin Code
+                </label>
+                <input
+                  type="text"
+                  id="pincode"
+                  name="pincode"
+                  required
+                  minLength={6}
+                  maxLength={6}
+                  pattern="[0-9]{6}"
+                  className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                  placeholder="560001"
+                  value={accountInfo.pincode}
+                  onChange={handleChange}
+                  onInput={(e) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9]/g,
+                      ""
+                    );
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="country"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Country
+              </label>
+              <input
+                type="text"
+                id="country"
+                name="country"
+                required
+                className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                value={accountInfo.country}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className={cn(
+              "w-full py-3 px-4 text-white rounded-lg font-semibold bg-purple-600 hover:bg-purple-700 shadow-lg",
+              {
+                "opacity-50 cursor-not-allowed": loading,
+              }
+            )}
+            disabled={loading}
+          >
+            Create Account
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
