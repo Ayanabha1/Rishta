@@ -22,6 +22,8 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const NEW_SCHEMA_MODULES = ["Engineers", "Salespersons"];
+
 export default function ProfilePage() {
   const [userData, setUserData] = useState<IUser>();
   const [profilePending, setProfilePending] = useState(false);
@@ -97,7 +99,7 @@ export default function ProfilePage() {
                       ?.split(" ")
                       .map((name) => name[0])
                       .join("")
-                  : userData?.module === "Engineers"
+                  : (userData?.module && NEW_SCHEMA_MODULES.includes(userData.module))
                   ? `${userData?.first_name?.[0]}${userData?.last_name?.[0]}`
                   : `${userData?.firstname?.[0]}${userData?.lastname?.[0]}`}
               </div>
@@ -121,7 +123,7 @@ export default function ProfilePage() {
                 {userData?.accounttype === "Dealers" ||
                 userData?.accounttype === "Business Partner"
                   ? userData?.owner_name
-                  : userData?.module === "Engineers"
+                  : (userData?.module && NEW_SCHEMA_MODULES.includes(userData.module))
                   ? `${userData?.first_name} ${userData?.last_name}`
                   : `${userData?.firstname} ${userData?.lastname}`}
               </h1>
@@ -178,7 +180,7 @@ export default function ProfilePage() {
                   <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
                 ) : (
                   <span className="/80">
-                    {userData?.module === "Engineers"
+                    {(userData?.module && NEW_SCHEMA_MODULES.includes(userData.module))
                       ? userData?.email_address
                       : userData?.email}
                   </span>
@@ -191,7 +193,7 @@ export default function ProfilePage() {
                 <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
               ) : (
                 <span className="/80">
-                  {userData?.module === "Engineers"
+                  {(userData?.module && NEW_SCHEMA_MODULES.includes(userData.module))
                     ? userData?.phone_number
                     : userData?.mobile}
                 </span>
@@ -203,7 +205,7 @@ export default function ProfilePage() {
                 <div className="h-6 w-48 bg-black/10 rounded animate-pulse"></div>
               ) : (
                 <span className="/80">
-                  {userData?.module === "Engineers"
+                  {(userData?.module && NEW_SCHEMA_MODULES.includes(userData.module))
                     ? `${userData?.address_line_1}, ${userData?.city}, ${userData?.state} ${userData?.zip_code}`
                     : userData?.address}
                 </span>
@@ -257,7 +259,7 @@ export default function ProfilePage() {
         {/* Only show Bank Details for Mason */}
         {userData?.accounttype !== "Dealers" &&
           userData?.accounttype !== "Business Partner" &&
-          userData?.module !== "Engineers" && (
+          !(userData?.module && NEW_SCHEMA_MODULES.includes(userData.module)) && (
             <div className="backdrop-blur-md rounded-2xl p-4 space-y-4">
               <h2 className="text-lg font-semibold">Bank Details</h2>
               <div className="space-y-3">
