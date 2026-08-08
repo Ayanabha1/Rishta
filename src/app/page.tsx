@@ -39,6 +39,8 @@ export default function Page() {
   const router = useRouter();
   const user = useUserStore();
   const isEngineer = userData?.module === "Engineers";
+  const isSalesperson = userData?.module === "Salespersons";
+  const showEstimates = isEngineer || isSalesperson;
 
   const getUserDetails = async () => {
     try {
@@ -126,10 +128,10 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (isEngineer && !pendingForApproval) {
+    if (showEstimates && !pendingForApproval) {
       getEstimates();
     }
-  }, [isEngineer, pendingForApproval]);
+  }, [showEstimates, pendingForApproval]);
 
   if (loading) {
     return (
@@ -148,7 +150,7 @@ export default function Page() {
     <section className="px-4 w-full h-full flex flex-col">
       <Header
         pendingForApproval={pendingForApproval}
-        QRVisible={!isEngineer}
+        QRVisible={!showEstimates}
         points={isEngineer ? userData?.total_points || "0" : undefined}
         MenuVisible={
           userData?.accounttype === "Dealers" ||
@@ -172,15 +174,17 @@ export default function Page() {
             </div>
           ) : (
             <div className="space-y-4 h-full flex flex-col">
-              {isEngineer ? (
+              {showEstimates ? (
                 <>
-                  <Link
-                    href="/create-estimate"
-                    className="w-full py-3 px-4 flex items-center justify-center gap-2 text-white rounded-lg font-semibold bg-purple-600 hover:bg-purple-700 shadow-lg transition-colors flex-shrink-0"
-                  >
-                    <FilePlus className="h-5 w-5" />
-                    Create Estimate
-                  </Link>
+                  {isEngineer && (
+                    <Link
+                      href="/create-estimate"
+                      className="w-full py-3 px-4 flex items-center justify-center gap-2 text-white rounded-lg font-semibold bg-purple-600 hover:bg-purple-700 shadow-lg transition-colors flex-shrink-0"
+                    >
+                      <FilePlus className="h-5 w-5" />
+                      Create Estimate
+                    </Link>
+                  )}
                   <div className="flex-1 min-h-0 glassmorphic-card rounded-2xl bg-white/10 backdrop-blur-md shadow-md p-4 overflow-y-auto">
                     <h2 className="text-lg font-semibold text-purple-950 mb-3">
                       Your Leads
