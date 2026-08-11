@@ -36,6 +36,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [estimates, setEstimates] = useState<IEstimate[]>([]);
   const [estimatesLoading, setEstimatesLoading] = useState(false);
+  const [leadStatusFilter, setLeadStatusFilter] = useState("New");
   const router = useRouter();
   const user = useUserStore();
   const isEngineer = userData?.module === "Engineers";
@@ -62,7 +63,11 @@ export default function Page() {
   const getEstimates = async () => {
     try {
       setEstimatesLoading(true);
-      const data = await API.get("/getSiteEstimates");
+      const data = await API.get(
+        isSalesperson
+          ? `/getMySiteEstimates?leadstatus=${leadStatusFilter}`
+          : "/getSiteEstimates"
+      );
       setEstimates(data.data.data.data || []);
     } catch (error) {
       errorHandler(error);
@@ -131,7 +136,7 @@ export default function Page() {
     if (showEstimates && !pendingForApproval) {
       getEstimates();
     }
-  }, [showEstimates, pendingForApproval]);
+  }, [showEstimates, pendingForApproval, leadStatusFilter]);
 
   if (loading) {
     return (
@@ -186,9 +191,41 @@ export default function Page() {
                     </Link>
                   )}
                   <div className="flex-1 min-h-0 glassmorphic-card rounded-2xl bg-white/10 backdrop-blur-md shadow-md p-4 overflow-y-auto">
-                    <h2 className="text-lg font-semibold text-purple-950 mb-3">
-                      Your Leads
-                    </h2>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <h2 className="text-lg font-semibold text-purple-950">
+                        Your Leads
+                      </h2>
+                      {isSalesperson && (
+                        <select
+                          value={leadStatusFilter}
+                          onChange={(e) => setLeadStatusFilter(e.target.value)}
+                          className="text-sm px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm text-purple-950 focus:outline-none focus:bg-white/60 transition-colors"
+                        >
+                          <option value="New">New</option>
+                          <option value="Contacted">Contacted</option>
+                          <option value="Lost">Lost</option>
+                          <option value="Visited">Visited</option>
+                          <option value="Estimate Validated">
+                            Estimate Validated
+                          </option>
+                          <option value="Quotation Shared">
+                            Quotation Shared
+                          </option>
+                          <option value="Dealer Mapped">Dealer Mapped</option>
+                          <option value="Sale Confirmed">
+                            Sale Confirmed
+                          </option>
+                          <option value="Invoice Generated">
+                            Invoice Generated
+                          </option>
+                          <option value="Reward Eligible">
+                            Reward Eligible
+                          </option>
+                          <option value="Reward Paid">Reward Paid</option>
+                          <option value="Assigned">Assigned</option>
+                        </select>
+                      )}
+                    </div>
                     {estimatesLoading ? (
                       <div className="flex justify-center items-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>

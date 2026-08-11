@@ -6,7 +6,35 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
+import { showSuccessToast } from "@/lib/utils";
+import { useUserStore } from "@/hooks/use-user";
 import { IEstimateDetail, IFileInfo } from "@/interfaces/IEstimate";
+
+interface ISalesUpdateForm {
+  opportunity_temperature: string;
+  conversion_probability: string;
+  actual_steel_qty: string;
+  visit_date: string;
+  visit_notes: string;
+  followup_date: string;
+  lost_reason: string;
+  lost_reason_notes: string;
+  quotation_status: string;
+  lead_status: string;
+}
+
+const emptySalesForm: ISalesUpdateForm = {
+  opportunity_temperature: "",
+  conversion_probability: "",
+  actual_steel_qty: "",
+  visit_date: "",
+  visit_notes: "",
+  followup_date: "",
+  lost_reason: "",
+  lost_reason_notes: "",
+  quotation_status: "",
+  lead_status: "",
+};
 
 interface FilePreview {
   id: string;
@@ -17,6 +45,8 @@ interface FilePreview {
 
 export default function EstimateDetailPage() {
   const params = useParams();
+  const user = useUserStore();
+  const isSalesperson = user?.module === "Salespersons";
   const [estimate, setEstimate] = useState<IEstimateDetail>();
   const [loading, setLoading] = useState(true);
   const [newFiles, setNewFiles] = useState<Array<{ name: string; data: string }>>([]);
@@ -25,6 +55,8 @@ export default function EstimateDetailPage() {
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [salesForm, setSalesForm] = useState<ISalesUpdateForm>(emptySalesForm);
+  const [savingSalesForm, setSavingSalesForm] = useState(false);
 
   const fetchFileAsBlob = async (fileInfo: IFileInfo) => {
     try {
@@ -59,6 +91,21 @@ export default function EstimateDetailPage() {
       );
       const est = data.data.data.data as IEstimateDetail;
       setEstimate(est);
+      setSalesForm({
+        opportunity_temperature: est.opportunity_temperature || "",
+        conversion_probability:
+          est.conversion_probability != null
+            ? String(est.conversion_probability)
+            : "",
+        actual_steel_qty: est.actual_steel_qty || "",
+        visit_date: est.visit_date || "",
+        visit_notes: est.visit_notes || "",
+        followup_date: est.followup_date || "",
+        lost_reason: est.lost_reason || "",
+        lost_reason_notes: est.lost_reason_notes || "",
+        quotation_status: est.quotation_status || "",
+        lead_status: est.lead_status || "",
+      });
 
       // Load file thumbnails
       if (est?.list_of_files && est.list_of_files.length > 0) {
@@ -89,6 +136,33 @@ export default function EstimateDetailPage() {
       setLoading(false);
     }
   }, [params.id]);
+
+  const handleSalesFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setSalesForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSalesFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!params.id) return;
+    setSavingSalesForm(true);
+    try {
+      const formData = new FormData();
+      formData.append("id", String(params.id));
+      Object.entries(salesForm).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+      await API.post("/updateSiteEstimate", formData);
+      showSuccessToast("Estimate updated successfully");
+      getEstimate();
+    } catch (error) {
+      errorHandler(error);
+    } finally {
+      setSavingSalesForm(false);
+    }
+  };
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -249,6 +323,211 @@ export default function EstimateDetailPage() {
                   {estimate.engineer_notes}
                 </p>
               </div>
+            )}
+
+            {isSalesperson && (
+              <form
+                onSubmit={handleSalesFormSubmit}
+                className="space-y-4 bg-white/20 rounded-2xl p-4"
+              >
+                <h2 className="text-lg font-bold text-black">
+                  Update Estimate
+                </h2>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Opportunity Temperature
+                    </label>
+                    <select
+                      name="opportunity_temperature"
+                      value={salesForm.opportunity_temperature}
+                      onChange={handleSalesFormChange}
+                      className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black focus:outline-none focus:bg-white/60 transition-colors"
+                    >
+                      <option value="">Select</option>
+                      <option value="Hot">Hot</option>
+                      <option value="Warm">Warm</option>
+                      <option value="Cold">Cold</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Conversion %
+                    </label>
+                    <input
+                      type="number"
+                      name="conversion_probability"
+                      min={0}
+                      max={100}
+                      value={salesForm.conversion_probability}
+                      onChange={handleSalesFormChange}
+                      className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                      placeholder="80"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">
+                    Actual Steel Qty
+                  </label>
+                  <input
+                    type="text"
+                    name="actual_steel_qty"
+                    value={salesForm.actual_steel_qty}
+                    onChange={handleSalesFormChange}
+                    className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                    placeholder="2.5 MT"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Visit Date
+                    </label>
+                    <input
+                      type="date"
+                      name="visit_date"
+                      max={new Date().toISOString().split("T")[0]}
+                      value={salesForm.visit_date}
+                      onChange={handleSalesFormChange}
+                      className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black focus:outline-none focus:bg-white/60 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Follow-up Date
+                    </label>
+                    <input
+                      type="date"
+                      name="followup_date"
+                      min={new Date().toISOString().split("T")[0]}
+                      value={salesForm.followup_date}
+                      onChange={handleSalesFormChange}
+                      className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black focus:outline-none focus:bg-white/60 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">
+                    Visit Notes
+                  </label>
+                  <textarea
+                    name="visit_notes"
+                    rows={3}
+                    value={salesForm.visit_notes}
+                    onChange={handleSalesFormChange}
+                    className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                    placeholder="Customer wants a revised quote for TMT bars."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Quotation Status
+                    </label>
+                    <select
+                      name="quotation_status"
+                      value={salesForm.quotation_status}
+                      onChange={handleSalesFormChange}
+                      className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black focus:outline-none focus:bg-white/60 transition-colors"
+                    >
+                      <option value="">Select</option>
+                      <option value="Not Shared">Not Shared</option>
+                      <option value="Shared">Shared</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">
+                      Lead Status
+                    </label>
+                    <select
+                      name="lead_status"
+                      value={salesForm.lead_status}
+                      onChange={handleSalesFormChange}
+                      className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black focus:outline-none focus:bg-white/60 transition-colors"
+                    >
+                      <option value="">Select</option>
+                      <option value="New">New</option>
+                      <option value="Contacted">Contacted</option>
+                      <option value="Lost">Lost</option>
+                      <option value="Visited">Visited</option>
+                      <option value="Estimate Validated">
+                        Estimate Validated
+                      </option>
+                      <option value="Quotation Shared">
+                        Quotation Shared
+                      </option>
+                      <option value="Dealer Mapped">Dealer Mapped</option>
+                      <option value="Sale Confirmed">Sale Confirmed</option>
+                      <option value="Invoice Generated">
+                        Invoice Generated
+                      </option>
+                      <option value="Reward Eligible">Reward Eligible</option>
+                      <option value="Reward Paid">Reward Paid</option>
+                      <option value="Assigned">Assigned</option>
+                    </select>
+                  </div>
+                </div>
+
+                {salesForm.lead_status === "Lost" && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">
+                        Lost Reason
+                      </label>
+                      <select
+                        name="lost_reason"
+                        value={salesForm.lost_reason}
+                        onChange={handleSalesFormChange}
+                        className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black focus:outline-none focus:bg-white/60 transition-colors"
+                      >
+                        <option value="">Select</option>
+                        <option value="Price Too High">Price Too High</option>
+                        <option value="Competitor Selected">
+                          Competitor Selected
+                        </option>
+                        <option value="Project Cancelled">
+                          Project Cancelled
+                        </option>
+                        <option value="Customer Unresponsive">
+                          Customer Unresponsive
+                        </option>
+                        <option value="Requirement Changed">
+                          Requirement Changed
+                        </option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">
+                        Lost Reason Notes
+                      </label>
+                      <textarea
+                        name="lost_reason_notes"
+                        rows={2}
+                        value={salesForm.lost_reason_notes}
+                        onChange={handleSalesFormChange}
+                        className="w-full px-3 py-2 bg-white/50 backdrop-blur-sm rounded-lg text-black placeholder-black/40 focus:outline-none focus:bg-white/60 transition-colors"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={savingSalesForm}
+                  className="w-full py-3 px-4 rounded-lg bg-purple-700 text-white font-semibold hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingSalesForm ? "Saving..." : "Save Update"}
+                </button>
+              </form>
             )}
 
             <div className="space-y-2 bg-white/20 rounded-2xl p-4">
