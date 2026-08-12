@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Building, HardHat, Wrench } from "lucide-react";
+import { ArrowLeft, Briefcase, Building, HardHat, Wrench } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function SelectAccountTypePage() {
   const [selectedType, setSelectedType] = useState<
-    "dealer" | "mason" | "engineer" | null
+    "dealer" | "mason" | "engineer" | "salesperson" | null
   >(null);
   const router = useRouter();
 
-  const handleSelection = (type: "dealer" | "mason" | "engineer") => {
+  const handleSelection = (
+    type: "dealer" | "mason" | "engineer" | "salesperson"
+  ) => {
     setSelectedType(type);
     router.push(`/create-account/${type}`);
   };
@@ -80,6 +82,18 @@ export default function SelectAccountTypePage() {
             >
               <Wrench className="h-6 w-6" />
               <span className="text-lg font-medium">Engineer</span>
+            </button>
+
+            <button
+              onClick={() => handleSelection("salesperson")}
+              className={`w-full p-4 rounded-lg flex items-center justify-center space-x-3 transition-colors ${
+                selectedType === "salesperson"
+                  ? "bg-purple-600 text-white"
+                  : "bg-white/50 backdrop-blur-sm hover:bg-white/60 text-purple-900"
+              }`}
+            >
+              <Briefcase className="h-6 w-6" />
+              <span className="text-lg font-medium">Sales Person</span>
             </button>
           </div>
         </div>

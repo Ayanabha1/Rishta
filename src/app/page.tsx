@@ -36,9 +36,12 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [estimates, setEstimates] = useState<IEstimate[]>([]);
   const [estimatesLoading, setEstimatesLoading] = useState(false);
+  const [leadStatusFilter, setLeadStatusFilter] = useState("New");
   const router = useRouter();
   const user = useUserStore();
   const isEngineer = userData?.module === "Engineers";
+  const isSalesperson = userData?.module === "Salespersons";
+  const showEstimates = isEngineer || isSalesperson;
 
   const getUserDetails = async () => {
     try {
@@ -60,7 +63,11 @@ export default function Page() {
   const getEstimates = async () => {
     try {
       setEstimatesLoading(true);
-      const data = await API.get("/getSiteEstimates");
+      const data = await API.get(
+        isSalesperson
+          ? `/getMySiteEstimates?leadstatus=${leadStatusFilter}`
+          : "/getSiteEstimates"
+      );
       setEstimates(data.data.data.data || []);
     } catch (error) {
       errorHandler(error);
@@ -126,10 +133,10 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (isEngineer && !pendingForApproval) {
+    if (showEstimates && !pendingForApproval) {
       getEstimates();
     }
-  }, [isEngineer, pendingForApproval]);
+  }, [showEstimates, pendingForApproval, leadStatusFilter]);
 
   if (loading) {
     return (
@@ -148,7 +155,7 @@ export default function Page() {
     <section className="px-4 w-full h-full flex flex-col">
       <Header
         pendingForApproval={pendingForApproval}
-        QRVisible={!isEngineer}
+        QRVisible={!showEstimates}
         points={isEngineer ? userData?.total_points || "0" : undefined}
         MenuVisible={
           userData?.accounttype === "Dealers" ||
@@ -172,19 +179,53 @@ export default function Page() {
             </div>
           ) : (
             <div className="space-y-4 h-full flex flex-col">
-              {isEngineer ? (
+              {showEstimates ? (
                 <>
-                  <Link
-                    href="/create-estimate"
-                    className="w-full py-3 px-4 flex items-center justify-center gap-2 text-white rounded-lg font-semibold bg-purple-600 hover:bg-purple-700 shadow-lg transition-colors flex-shrink-0"
-                  >
-                    <FilePlus className="h-5 w-5" />
-                    Create Estimate
-                  </Link>
+                  {isEngineer && (
+                    <Link
+                      href="/create-estimate"
+                      className="w-full py-3 px-4 flex items-center justify-center gap-2 text-white rounded-lg font-semibold bg-purple-600 hover:bg-purple-700 shadow-lg transition-colors flex-shrink-0"
+                    >
+                      <FilePlus className="h-5 w-5" />
+                      Create Estimate
+                    </Link>
+                  )}
                   <div className="flex-1 min-h-0 glassmorphic-card rounded-2xl bg-white/10 backdrop-blur-md shadow-md p-4 overflow-y-auto">
-                    <h2 className="text-lg font-semibold text-purple-950 mb-3">
-                      Your Leads
-                    </h2>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <h2 className="text-lg font-semibold text-purple-950">
+                        Your Leads
+                      </h2>
+                      {isSalesperson && (
+                        <select
+                          value={leadStatusFilter}
+                          onChange={(e) => setLeadStatusFilter(e.target.value)}
+                          className="text-sm px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm text-purple-950 focus:outline-none focus:bg-white/60 transition-colors"
+                        >
+                          <option value="New">New</option>
+                          <option value="Contacted">Contacted</option>
+                          <option value="Lost">Lost</option>
+                          <option value="Visited">Visited</option>
+                          <option value="Estimate Validated">
+                            Estimate Validated
+                          </option>
+                          <option value="Quotation Shared">
+                            Quotation Shared
+                          </option>
+                          <option value="Dealer Mapped">Dealer Mapped</option>
+                          <option value="Sale Confirmed">
+                            Sale Confirmed
+                          </option>
+                          <option value="Invoice Generated">
+                            Invoice Generated
+                          </option>
+                          <option value="Reward Eligible">
+                            Reward Eligible
+                          </option>
+                          <option value="Reward Paid">Reward Paid</option>
+                          <option value="Assigned">Assigned</option>
+                        </select>
+                      )}
+                    </div>
                     {estimatesLoading ? (
                       <div className="flex justify-center items-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
