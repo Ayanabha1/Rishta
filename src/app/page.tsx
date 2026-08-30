@@ -29,6 +29,7 @@ import { ArrowLeft } from "lucide-react";
 import { database } from "@/lib/firebase";
 import { ref, set } from "firebase/database";
 import IEstimate from "@/interfaces/IEstimate";
+import { SALES_LIST_STATUSES, formatFollowup } from "@/lib/lead-stages";
 
 export default function Page() {
   const [userData, setUserData] = useState<IUser>();
@@ -36,7 +37,9 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [estimates, setEstimates] = useState<IEstimate[]>([]);
   const [estimatesLoading, setEstimatesLoading] = useState(false);
-  const [leadStatusFilter, setLeadStatusFilter] = useState("New");
+  const [leadStatusFilter, setLeadStatusFilter] = useState(
+    SALES_LIST_STATUSES[0]
+  );
   const router = useRouter();
   const user = useUserStore();
   const isEngineer = userData?.module === "Engineers";
@@ -201,28 +204,11 @@ export default function Page() {
                           onChange={(e) => setLeadStatusFilter(e.target.value)}
                           className="text-sm px-2 py-1 rounded-lg bg-white/50 backdrop-blur-sm text-purple-950 focus:outline-none focus:bg-white/60 transition-colors"
                         >
-                          <option value="New">New</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Lost">Lost</option>
-                          <option value="Visited">Visited</option>
-                          <option value="Estimate Validated">
-                            Estimate Validated
-                          </option>
-                          <option value="Quotation Shared">
-                            Quotation Shared
-                          </option>
-                          <option value="Dealer Mapped">Dealer Mapped</option>
-                          <option value="Sale Confirmed">
-                            Sale Confirmed
-                          </option>
-                          <option value="Invoice Generated">
-                            Invoice Generated
-                          </option>
-                          <option value="Reward Eligible">
-                            Reward Eligible
-                          </option>
-                          <option value="Reward Paid">Reward Paid</option>
-                          <option value="Assigned">Assigned</option>
+                          {SALES_LIST_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
                         </select>
                       )}
                     </div>
@@ -236,35 +222,50 @@ export default function Page() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {estimates.map((estimate) => (
-                          <Link
-                            key={estimate.siteestimateid}
-                            href={`/estimate/${estimate.siteestimateid}`}
-                            className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors flex items-start gap-3"
-                          >
-                            <FileText className="h-5 w-5 text-purple-700 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-purple-950">
-                                {estimate.customer_name}
-                              </p>
-                              <p className="text-sm text-purple-800/70">
-                                {estimate.siteestimate_no} &middot;{" "}
-                                {estimate.pincode}
-                              </p>
-                            </div>
-                            {estimate.lead_status && (
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-xs flex-shrink-0 ${
-                                  estimate.lead_status === "New"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
-                                {estimate.lead_status}
-                              </span>
-                            )}
-                          </Link>
-                        ))}
+                        {estimates.map((estimate) => {
+                          // The list response is thinner than the detail one —
+                          // fall back so a row never shows an orphan separator.
+                          const reference = [
+                            estimate.siteestimate_no,
+                            estimate.pincode,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ");
+                          return (
+                            <Link
+                              key={estimate.siteestimateid}
+                              href={`/estimate/${estimate.siteestimateid}`}
+                              className="p-3 rounded-xl bg-white/40 hover:bg-white/60 transition-colors flex items-start gap-3"
+                            >
+                              <FileText className="h-5 w-5 text-purple-700 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 min-w-0 space-y-0.5">
+                                <p className="font-medium text-purple-950 truncate">
+                                  {estimate.customer_name}
+                                </p>
+                                {estimate.site_address && (
+                                  <p className="text-sm text-purple-800/70 truncate">
+                                    {estimate.site_address}
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-2 text-xs text-purple-800/60">
+                                  {reference && <span>{reference}</span>}
+                                  {estimate.followup_date && (
+                                    <>
+                                      {reference && <span>·</span>}
+                                      <span className="truncate">
+                                        Follow-up{" "}
+                                        {formatFollowup(
+                                          estimate.followup_date,
+                                          estimate.followup_time
+                                        )}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

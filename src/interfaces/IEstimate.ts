@@ -5,6 +5,12 @@ interface IEstimate {
   pincode: string;
   lead_status: string;
   salesperson_name: string;
+  engineer_name?: string;
+  site_address?: string;
+  mobile_number?: string;
+  status?: string;
+  followup_date?: string | null;
+  followup_time?: string | null;
 }
 
 interface IFileInfo {
@@ -40,13 +46,16 @@ interface IEstimateDetail {
   visit_date: string | null;
   visit_notes: string;
   followup_date: string | null;
+  followup_time: string | null;
   quotation_status: string;
+  dealer_name?: string | null;
   dealer_remarks: string;
   lost_reason: string;
   lost_reason_notes: string;
   original_engineer_name: string | null;
   original_estimate_snapshot: string | null;
   salesperson_name: string;
+  engineer_name?: string;
   list_of_files?: IFileInfo[];
 }
 
