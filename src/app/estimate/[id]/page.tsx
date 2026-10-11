@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ArrowLeft,
   Phone,
@@ -13,11 +13,22 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Select from "react-select/async";
 import debounce from "debounce-promise";
+import axios from "axios";
 import { API } from "@/lib/axios";
 import errorHandler from "@/lib/error-handler";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { useUserStore } from "@/hooks/use-user";
 import { IEstimateDetail, IFileInfo } from "@/interfaces/IEstimate";
+import { ExtraSteelTabs } from "@/components/extra-steel-tabs";
+import {
+  ExtraSteelRequirementForm,
+  ExtraSteelRequirementPage,
+  buildExtraSteelRequirementPayload,
+  canRequestExtraSteel,
+  isCurrentExtraSteelRequest,
+  parseExtraSteelRequirementsResponse,
+  validateExtraSteelRequirement,
+} from "@/lib/extra-steel";
 import {
   LOST,
   LOST_REASONS,
@@ -65,6 +76,13 @@ const emptySalesForm: ISalesUpdateForm = {
   lead_status: "",
 };
 
+const emptyExtraSteelForm: ExtraSteelRequirementForm = {
+  extraSteelQty: "",
+  reason: "",
+};
+
+const EXTRA_STEEL_PAGE_SIZE = 10;
+
 const FIELD_LABELS: Record<string, string> = {
   opportunity_temperature: "Opportunity Temperature",
   conversion_probability: "Conversion %",
@@ -109,12 +127,28 @@ export default function EstimateDetailPage() {
   const [invoiceUploading, setInvoiceUploading] = useState(false);
   const [invoiceName, setInvoiceName] = useState("");
   const [notesExpanded, setNotesExpanded] = useState(false);
+  const [extraSteelPage, setExtraSteelPage] = useState(1);
+  const [extraSteelData, setExtraSteelData] =
+    useState<ExtraSteelRequirementPage>();
+  const [extraSteelLoading, setExtraSteelLoading] = useState(false);
+  const [extraSteelError, setExtraSteelError] = useState("");
+  const [extraSteelFormOpen, setExtraSteelFormOpen] = useState(false);
+  const [extraSteelForm, setExtraSteelForm] = useState<ExtraSteelRequirementForm>(
+    emptyExtraSteelForm
+  );
+  const [submittingExtraSteel, setSubmittingExtraSteel] = useState(false);
+  const [showBillPrompt, setShowBillPrompt] = useState(false);
+  const filesSectionRef = useRef<HTMLDivElement>(null);
+  const extraSteelRequestRef = useRef<AbortController | null>(null);
+  const activeEstimateIdRef = useRef("");
+  activeEstimateIdRef.current = String(params.id || "");
 
   const currentStatus = estimate?.lead_status || "";
   const nextStatuses = getNextStatuses(currentStatus);
   const targetStatus = salesForm.lead_status;
   const currentStageIndex = stageIndex(currentStatus);
   const nextStage = STAGE_ORDER[currentStageIndex + 1];
+  const showExtraSteel = canRequestExtraSteel(user?.module, currentStatus);
 
   const progressChips = [
     estimate?.opportunity_temperature && {
@@ -235,6 +269,120 @@ export default function EstimateDetailPage() {
       setLoading(false);
     }
   }, [params.id]);
+
+  const getExtraSteelRequirements = useCallback(
+    async (page: number) => {
+      if (!params.id) return;
+
+      extraSteelRequestRef.current?.abort();
+      const controller = new AbortController();
+      extraSteelRequestRef.current = controller;
+      setExtraSteelLoading(true);
+      setExtraSteelError("");
+      try {
+        const response = await API.get(
+          "/getExtraSteelRequirements",
+          {
+            params: {
+              siteestimateid: params.id,
+              page,
+              limit: EXTRA_STEEL_PAGE_SIZE,
+            },
+            signal: controller.signal,
+          }
+        );
+        const result = response.data?.data;
+
+        if (extraSteelRequestRef.current !== controller) return;
+        setExtraSteelData(
+          parseExtraSteelRequirementsResponse(
+            result,
+            Number(params.id),
+            page,
+            EXTRA_STEEL_PAGE_SIZE
+          )
+        );
+      } catch (error) {
+        if (axios.isCancel(error) || controller.signal.aborted) return;
+        setExtraSteelError("Could not load extra steel requirements.");
+        errorHandler(error);
+      } finally {
+        if (extraSteelRequestRef.current === controller) {
+          setExtraSteelLoading(false);
+        }
+      }
+    },
+    [params.id]
+  );
+
+  const handleExtraSteelSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!params.id) return;
+    const submittedEstimateId = String(params.id);
+
+    const validationError = validateExtraSteelRequirement(extraSteelForm);
+    if (validationError) {
+      showErrorToast(validationError);
+      return;
+    }
+
+    setSubmittingExtraSteel(true);
+    try {
+      const payload = buildExtraSteelRequirementPayload(
+        Number(submittedEstimateId),
+        extraSteelForm
+      );
+      const response = await API.post("/createExtraSteelRequirement", payload);
+
+      if (
+        !isCurrentExtraSteelRequest(
+          submittedEstimateId,
+          activeEstimateIdRef.current
+        )
+      ) {
+        return;
+      }
+
+      showSuccessToast(
+        response.data?.data?.message ||
+          "Extra steel requirement added successfully"
+      );
+      setExtraSteelForm(emptyExtraSteelForm);
+      setExtraSteelFormOpen(false);
+      setShowBillPrompt(true);
+      if (extraSteelPage === 1) {
+        void getExtraSteelRequirements(1);
+      } else {
+        setExtraSteelPage(1);
+      }
+
+      window.setTimeout(() => {
+        filesSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    } catch (error) {
+      if (
+        !isCurrentExtraSteelRequest(
+          submittedEstimateId,
+          activeEstimateIdRef.current
+        )
+      ) {
+        return;
+      }
+      errorHandler(error);
+    } finally {
+      if (
+        isCurrentExtraSteelRequest(
+          submittedEstimateId,
+          activeEstimateIdRef.current
+        )
+      ) {
+        setSubmittingExtraSteel(false);
+      }
+    }
+  };
 
   const handleSalesFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -372,6 +520,25 @@ export default function EstimateDetailPage() {
   useEffect(() => {
     if (params.id) getEstimate();
   }, [params.id, getEstimate]);
+
+  useEffect(() => {
+    extraSteelRequestRef.current?.abort();
+    setExtraSteelData(undefined);
+    setExtraSteelError("");
+    setExtraSteelPage(1);
+    setExtraSteelForm(emptyExtraSteelForm);
+    setExtraSteelFormOpen(false);
+    setSubmittingExtraSteel(false);
+    setShowBillPrompt(false);
+
+    return () => extraSteelRequestRef.current?.abort();
+  }, [params.id]);
+
+  useEffect(() => {
+    if (showExtraSteel) {
+      void getExtraSteelRequirements(extraSteelPage);
+    }
+  }, [showExtraSteel, extraSteelPage, getExtraSteelRequirements]);
 
   return (
     <div className="h-full w-full glassmorphic-card shadow-2xl overflow-y-hidden">
@@ -634,10 +801,28 @@ export default function EstimateDetailPage() {
             )}
 
             {isSalesperson && (
-              <form
-                onSubmit={handleSalesFormSubmit}
-                className="space-y-4 bg-white/20 rounded-2xl p-4"
-              >
+              showExtraSteel ? (
+                <ExtraSteelTabs
+                  leadStatus={currentStatus}
+                  data={extraSteelData}
+                  loading={extraSteelLoading}
+                  error={extraSteelError}
+                  formOpen={extraSteelFormOpen}
+                  form={extraSteelForm}
+                  submitting={submittingExtraSteel}
+                  onFormOpenChange={setExtraSteelFormOpen}
+                  onFormChange={setExtraSteelForm}
+                  onSubmit={handleExtraSteelSubmit}
+                  onPageChange={setExtraSteelPage}
+                  onRetry={() =>
+                    void getExtraSteelRequirements(extraSteelPage)
+                  }
+                />
+              ) : (
+                <form
+                  onSubmit={handleSalesFormSubmit}
+                  className="space-y-4 bg-white/20 rounded-2xl p-4"
+                >
                 <h2 className="text-lg font-bold text-black">
                   Update Estimate
                 </h2>
@@ -917,11 +1102,24 @@ export default function EstimateDetailPage() {
                     </button>
                   </>
                 )}
-              </form>
+                </form>
+              )
             )}
 
-            <div className="space-y-2 bg-white/20 rounded-2xl p-4">
+            <div
+              ref={filesSectionRef}
+              className="space-y-2 bg-white/20 rounded-2xl p-4"
+            >
               <h2 className="text-lg font-bold text-black">Files</h2>
+
+              {showBillPrompt && (
+                <div
+                  role="status"
+                  className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900"
+                >
+                  Kindly upload your bill
+                </div>
+              )}
 
               {/* Display existing files as thumbnails */}
               {filePreviews.length > 0 && (
@@ -1085,6 +1283,7 @@ export default function EstimateDetailPage() {
                   if (!params.id) return;
                   setUploading(true);
                   setUploadMsg("Uploading files...");
+                  let uploadFailed = false;
                   for (let i = 0; i < newFiles.length; i++) {
                     const f = newFiles[i];
                     const fd = new FormData();
@@ -1096,6 +1295,7 @@ export default function EstimateDetailPage() {
                       // eslint-disable-next-line no-await-in-loop
                       await API.post("/uploadFile", fd);
                     } catch (err) {
+                      uploadFailed = true;
                       console.error(err);
                     }
                   }
@@ -1103,6 +1303,7 @@ export default function EstimateDetailPage() {
                   setUploadMsg("");
                   setNewFiles([]);
                   setUploadModalOpen(false);
+                  if (!uploadFailed) setShowBillPrompt(false);
                   // refresh estimate to show uploaded files
                   getEstimate();
                 }}
