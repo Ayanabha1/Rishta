@@ -5,18 +5,15 @@ import {
   User,
   QrCode,
   FileUpIcon,
-  List,
-  HardHat,
   Users,
   StarIcon,
+  Gift,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import QRScanner from "./QRScanner";
 import { IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import { useUserStore } from "@/hooks/use-user";
-import { cn, showErrorToast, showSuccessToast } from "@/lib/utils";
-import { API } from "@/lib/axios";
+import { cn, showErrorToast } from "@/lib/utils";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -61,12 +58,24 @@ export function Header({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        {points !== undefined && (
-          <div className="flex items-center gap-1 rounded-full border border-purple-900/20 bg-purple-900/10 px-3 py-1.5 text-sm font-semibold text-purple-900">
+        {points !== undefined ? (
+          <Link
+            href="/redeem-catalogue"
+            aria-label={`${points} points. Open rewards catalogue`}
+            className="flex items-center gap-1 rounded-full border border-purple-900/20 bg-purple-900/10 px-3 py-1.5 text-sm font-semibold text-purple-900 transition-colors hover:bg-white/30"
+          >
             <StarIcon className="h-4 w-4 fill-current" />
             <span>{points}</span>
-          </div>
-        )}
+          </Link>
+        ) : !pendingForApproval ? (
+          <Link
+            href="/redeem-catalogue"
+            aria-label="Open rewards catalogue"
+            className="rounded-full p-2 transition-colors hover:bg-white/20"
+          >
+            <Gift className="h-6 w-6 text-purple-900" />
+          </Link>
+        ) : null}
 
         <Link
           href="/profile"

@@ -15,7 +15,7 @@ export const NEXT_STATUS: Record<string, string[]> = {
 };
 
 // Statuses a salesperson may request on the list endpoint. Anything else
-// (New, Lost, Invoice Generated, Reward Eligible, Reward Paid) is a 403.
+// (New, Lost, Invoice Generated) is a 403.
 export const SALES_LIST_STATUSES = [
   "Assigned",
   "Contacted",
@@ -24,6 +24,8 @@ export const SALES_LIST_STATUSES = [
   "Quotation Shared",
   "Dealer Mapped",
   "Sale Confirmed",
+  "Reward Eligible",
+  "Reward Paid",
 ];
 
 // The forward pipeline, in order. Lost is a side exit, not a stage.
